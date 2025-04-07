@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>文字飛ばしゲーム</title>
+    <meta charset="UTF-8">
+    <style>
+        /* (CSSは変更なし) */
+        body { /* ... */ }
+        canvas { /* ... */ }
+        #instructions { /* ... */ }
+        /* --- 追加 --- */
+        #controlsInfo {
+            position: absolute;
+            top: 10px;
+            right: 10px; /* 右上に配置 */
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 3px;
+            text-align: right;
+        }
+        #controlsInfo div {
+            margin-bottom: 3px;
+        }
+        /* --- ここまで --- */
+    </style>
+</head>
+<body>
+    <div id="instructions">
+        文字キー (R,E,A,Z,O,N) で発射！<br>
+        矢印キーで角度と強さを調整。
+    </div>
+    <div id="controlsInfo">
+        <div>角度: <span id="angleDisplay">0</span>°</div>
+        <div>強さ: <span id="strengthDisplay">15</span></div>
+        <div>← → : 角度変更</div>
+        <div>↑ ↓ : 強さ変更</div>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
