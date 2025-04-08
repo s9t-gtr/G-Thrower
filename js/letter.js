@@ -11,98 +11,109 @@ window.GThrower = window.GThrower || {};
     const Bodies = Matter.Bodies;
     const Composite = Matter.Composite;
     const Events = Matter.Events;
+    const Vertices = Matter.Vertices; // Vertices モジュールも使うかも
 
     // 文字作成関数を格納する内部オブジェクト
     const letterCreators = {};
 
-    // --- 文字 'E' の作成関数 (変更なし) ---
-    letterCreators['E'] = function(x, y) {
-        const scale = config.LETTER_SCALE;
-        const partW = 10 * scale; const h = 50 * scale; const barW = 35 * scale;
-        const stem = Bodies.rectangle(-15 * scale, 0, partW, h);
-        const topBar = Bodies.rectangle(0, -h / 2 + partW / 2, barW, partW);
-        const midBar = Bodies.rectangle(-2 * scale, 0, barW * 0.9, partW);
-        const botBar = Bodies.rectangle(0, h / 2 - partW / 2, barW, partW);
-
-        const letterE = Body.create({
-            parts: [stem, topBar, midBar, botBar],
-            frictionAir: 0.03, friction: 0.1, restitution: 0.4,
-            isSleeping: true
-        });
-        Body.setPosition(letterE, { x: x, y: y });
-        Body.setAngle(letterE, 0);
-        return letterE;
-    };
-
-    // --- ★★★ 文字 'G' の作成関数 (見た目調整版) ★★★ ---
+    // --- ★★★ 文字 'G' の作成関数 (直線位置修正・20 Rectangle版) ★★★ ---
     letterCreators['G'] = function(x, y) {
-        const scale = config.LETTER_SCALE; // configから取得 (例: 0.8)
+        const scale = config.LETTER_SCALE;
+        const radius = 38 * scale;        // 全体のサイズ感
+        const partThickness = 8 * scale; // 線の太さ
+        const partOptions = {};
 
-        // ↓↓↓ サイズと太さを調整 ↓↓↓
-        const radius = 35 * scale;        // サイズを大きく (以前: 25 * scale)
-        const partThickness = 8 * scale; // パーツを細く (以前: 12 * scale)
-        const chamfer = { radius: 1.5 * scale }; // 角の丸みも調整 (以前: 2 * scale)
-        // ↑↑↑ 調整ここまで ↑↑↑
+        const parts = [];
 
-        // Gの形状を構成するパーツ (座標はボディの中心が(0,0)になるように調整)
-        const outerHeight = radius * 2; // 全体の高さの目安
-        const outerWidth = radius * 1.8; // 全体の幅の目安 (少し横長)
+        // --- 円弧部分の生成 (18 セグメント) ---
+        const arcSegments = 18;
+        const startAngle = -Math.PI / 3.5; // 開始角度 (右上)
+        const endAngle = Math.PI * 1.3;  // 終了角度 (右下の手前)
+        const angleStep = (endAngle - startAngle) / arcSegments;
+        const segmentLength = radius * angleStep * 1.15; // セグメント長
 
-        // 長方形ベースのG (位置とサイズを新しい radius と partThickness で計算)
-        const leftBar = Bodies.rectangle(
-            -outerWidth / 2 + partThickness / 2, // X: 左端
-            0,                                   // Y: 中央
-            partThickness,                       // 幅: 細くした太さ
-            outerHeight * 0.9,                   // 高さ: 全体の高さより少し短い
-            { chamfer: chamfer }
-        );
-        const topBar = Bodies.rectangle(
-            0,                                   // X: 中央
-            -outerHeight / 2 + partThickness / 2, // Y: 上端
-            outerWidth * 0.8,                    // 幅: 全体の幅より少し短い
-            partThickness,                       // 高さ: 細くした太さ
-            { chamfer: chamfer }
-        );
-        const bottomBar = Bodies.rectangle(
-            -outerWidth * 0.1,                   // X: 少し左寄りから開始
-            outerHeight / 2 - partThickness / 2, // Y: 下端
-            outerWidth * 0.8,                    // 幅: 全体の幅より少し短い
-            partThickness,                       // 高さ: 細くした太さ
-            { chamfer: chamfer }
-        );
-        const rightBar = Bodies.rectangle(
-            outerWidth / 2 - partThickness / 2, // X: 右端
-            radius * 0.2,                        // Y: 中央より少し下から開始
-            partThickness,                       // 幅: 細くした太さ
-            outerHeight * 0.6,                   // 高さ: 全体の高さの60%程度
-            { chamfer: chamfer }
-        );
-        const innerBar = Bodies.rectangle(
-            radius * 0.1,                        // X: 中央より少し右から開始
-            0,                                   // Y: 中央 (高さの中心)
-            radius * 0.8,                        // 幅: 半径の80%程度
-            partThickness,                       // 高さ: 細くした太さ
-            { chamfer: chamfer }
-        );
+        console.log(`Creating ${arcSegments} arc segments for G...`);
+        for (let i = 0; i < arcSegments; i++) {
+            const currentAngle = startAngle + (i + 0.5) * angleStep;
+            const cx = radius * Math.cos(currentAngle);
+            const cy = radius * Math.sin(currentAngle);
+            const segmentAngle = currentAngle + Math.PI / 2;
+            parts.push(Bodies.rectangle(cx, cy, segmentLength, partThickness, {
+                ...partOptions,
+                angle: segmentAngle
+            }));
+        }
+        // これで 18 本
 
-        // 複合ボディを作成
+        // --- 直線部分の生成 (2本) ---
+        console.log("Creating straight segments for G...");
+
+        // 19. 右縦棒 (1本) - 位置を修正
+        const rightBarHeight = radius * 0.9; // 高さ調整
+        const rightBarAngle = Math.PI / 2;    // 垂直
+        // ↓↓↓ X座標: Gの右端として想定される位置に固定的に配置 (例: 半径の90%の位置) ↓↓↓
+        const rightBarCx = radius * 0.9;
+        // ↓↓↓ Y座標: 中心より少し下に配置 ↓↓↓
+        const rightBarCy = radius * 0.4;
+        // ↑↑↑ 修正ここまで ↑↑↑
+        parts.push(Bodies.rectangle(rightBarCx, rightBarCy, rightBarHeight, partThickness, {
+            ...partOptions,
+            angle: rightBarAngle
+        })); // 19本目
+
+        // 20. 内側横棒 (クロスバー, 1本) - 位置を修正
+        const innerBarLength = radius * 1.0; // 長さ調整
+        const innerBarAngle = 0;             // 水平
+        // ↓↓↓ X座標: 新しい右縦棒の左端から内側に伸びるように計算 ↓↓↓
+        // 右縦棒の中心X - 半分の太さ = 右縦棒の左端のX
+        // 横棒の中心X = 右縦棒の左端のX - 横棒の半分の長さ + 少し重ねるオフセット
+        const innerBarCx = (rightBarCx - partThickness / 2) - innerBarLength / 2 + (partThickness * 0.2);
+        // ↓↓↓ Y座標: 中心付近に配置 ↓↓↓
+        const innerBarCy = radius * 0.1; // 中心より少し上
+        // ↑↑↑ 修正ここまで ↑↑↑
+        parts.push(Bodies.rectangle(innerBarCx, innerBarCy, innerBarLength, partThickness, {
+            ...partOptions,
+            angle: innerBarAngle
+        })); // 20本目
+
+        console.log(`Total parts created for G: ${parts.length}`);
+
+        // --- 複合ボディの作成 ---
         const letterG = Body.create({
-            parts: [leftBar, topBar, bottomBar, rightBar, innerBar],
-            frictionAir: 0.03,
+            parts: parts,
+            frictionAir: 0.035,
             friction: 0.1,
-            restitution: 0.4,
-            isSleeping: true
-            // 必要に応じて質量や密度を調整
-            // density: 0.0008 // 例: 少し軽くする場合
+            restitution: 0.35,
+            isSleeping: true,
+            density: 0.0009
         });
 
+        // 重心補正
+        try {
+             let allVertices = [];
+             if (letterG.parts && letterG.parts.length > 1) {
+                  for (let i = 1; i < letterG.parts.length; i++) {
+                       if (letterG.parts[i] && letterG.parts[i].vertices) {
+                           allVertices = allVertices.concat(letterG.parts[i].vertices);
+                       }
+                  }
+             }
+             if (allVertices.length > 0) {
+                  let center = Vertices.centre(allVertices);
+                  Body.translate(letterG, { x: -center.x, y: -center.y });
+             } else {
+                  console.warn("Could not calculate center for Letter G (20 seg), vertices not found or empty.");
+             }
+        } catch (e) {
+            console.error("Error centering Letter G (20 seg):", e);
+        }
+
+        // 最終的な位置と角度を設定
         Body.setPosition(letterG, { x: x, y: y });
         Body.setAngle(letterG, 0);
-        // console.log("Created Scaled Letter G body:", letterG); // デバッグ用ログ
+        console.log(`Created 20-segment Letter G body (ID: ${letterG.id}) - Adjusted straight parts`);
         return letterG;
     };
-    // ★★★ 修正ここまで ★★★
-
 
     // --- 文字を初期配置する関数 (変更なし) ---
     G.initializeLetters = function(letterChar, count) {
