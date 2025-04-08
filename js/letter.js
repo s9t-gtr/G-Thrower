@@ -16,61 +16,67 @@ window.GThrower = window.GThrower || {};
     // 文字作成関数を格納する内部オブジェクト
     const letterCreators = {};
 
-    // --- ★★★ 文字 'G' の作成関数 (直線位置修正・20 Rectangle版) ★★★ ---
+    // --- ★★★ 文字 'G' の作成関数 (円弧部分のみ回転) ★★★ ---
     letterCreators['G'] = function(x, y) {
         const scale = config.LETTER_SCALE;
-        const radius = 38 * scale;        // 全体のサイズ感
-        const partThickness = 8 * scale; // 線の太さ
+        const radius = 38 * scale;
+        const partThickness = 8 * scale;
         const partOptions = {};
 
         const parts = [];
 
         // --- 円弧部分の生成 (18 セグメント) ---
         const arcSegments = 18;
-        const startAngle = -Math.PI / 3.5; // 開始角度 (右上)
-        const endAngle = Math.PI * 1.3;  // 終了角度 (右下の手前)
+        const startAngle = -Math.PI / 3.5;
+        const endAngle = Math.PI * 1.3;
         const angleStep = (endAngle - startAngle) / arcSegments;
-        const segmentLength = radius * angleStep * 1.15; // セグメント長
+        const segmentLength = radius * angleStep * 1.15;
+        // ↓↓↓ 時計回り90度の回転角度を定義 ↓↓↓
+        const rotationAngle = Math.PI / 2;
+        // ↑↑↑ 定義ここまで ↑↑↑
 
-        console.log(`Creating ${arcSegments} arc segments for G...`);
+        console.log(`Creating ${arcSegments} rotated arc segments for G...`);
         for (let i = 0; i < arcSegments; i++) {
             const currentAngle = startAngle + (i + 0.5) * angleStep;
-            const cx = radius * Math.cos(currentAngle);
-            const cy = radius * Math.sin(currentAngle);
+
+            // ↓↓↓ 中心座標計算用の角度に回転を加える ↓↓↓
+            const rotatedCurrentAngle = currentAngle + rotationAngle;
+            // ↓↓↓ 回転後の角度で座標を計算 ↓↓↓
+            const cx = radius * Math.cos(rotatedCurrentAngle);
+            const cy = radius * Math.sin(rotatedCurrentAngle);
+
+            // ↓↓↓ パーツ自体の角度も回転させる ↓↓↓
+            // 元のセグメント角度 (接線方向)
             const segmentAngle = currentAngle + Math.PI / 2;
+            // 回転後のセグメント角度
+            const rotatedSegmentAngle = segmentAngle + rotationAngle;
+            // ↑↑↑ 変更ここまで ↑↑↑
+
             parts.push(Bodies.rectangle(cx, cy, segmentLength, partThickness, {
                 ...partOptions,
-                angle: segmentAngle
+                angle: rotatedSegmentAngle // 回転後の角度を設定
             }));
         }
-        // これで 18 本
+        // これで回転された円弧 18 本
 
         // --- 直線部分の生成 (2本) ---
-        console.log("Creating straight segments for G...");
-
-        // 19. 右縦棒 (1本) - 位置を修正
-        const rightBarHeight = radius * 0.9; // 高さ調整
-        const rightBarAngle = Math.PI / 2;    // 垂直
-        // ↓↓↓ X座標: Gの右端として想定される位置に固定的に配置 (例: 半径の90%の位置) ↓↓↓
-        const rightBarCx = radius * 0.9;
-        // ↓↓↓ Y座標: 中心より少し下に配置 ↓↓↓
-        const rightBarCy = radius * 0.4;
-        // ↑↑↑ 修正ここまで ↑↑↑
+        // ★★★ 直線部分の座標・角度計算は変更しない ★★★
+        console.log("Creating straight segments for G (original position)...");
+        // 19. 右縦棒 (1本)
+        const rightBarHeight = radius * 0.9;
+        const rightBarAngle = Math.PI / 2;
+        const rightBarCx = radius * 0.9; // 固定的なX
+        const rightBarCy = radius * 0.4; // 固定的なY
         parts.push(Bodies.rectangle(rightBarCx, rightBarCy, rightBarHeight, partThickness, {
             ...partOptions,
             angle: rightBarAngle
         })); // 19本目
 
-        // 20. 内側横棒 (クロスバー, 1本) - 位置を修正
-        const innerBarLength = radius * 1.0; // 長さ調整
-        const innerBarAngle = 0;             // 水平
-        // ↓↓↓ X座標: 新しい右縦棒の左端から内側に伸びるように計算 ↓↓↓
-        // 右縦棒の中心X - 半分の太さ = 右縦棒の左端のX
-        // 横棒の中心X = 右縦棒の左端のX - 横棒の半分の長さ + 少し重ねるオフセット
+        // 20. 内側横棒 (クロスバー, 1本)
+        const innerBarLength = radius * 1.0;
+        const innerBarAngle = 0;
         const innerBarCx = (rightBarCx - partThickness / 2) - innerBarLength / 2 + (partThickness * 0.2);
-        // ↓↓↓ Y座標: 中心付近に配置 ↓↓↓
-        const innerBarCy = radius * 0.1; // 中心より少し上
-        // ↑↑↑ 修正ここまで ↑↑↑
+        const innerBarCy = radius * 0.1;
         parts.push(Bodies.rectangle(innerBarCx, innerBarCy, innerBarLength, partThickness, {
             ...partOptions,
             angle: innerBarAngle
@@ -88,30 +94,31 @@ window.GThrower = window.GThrower || {};
             density: 0.0009
         });
 
-        // 重心補正
+        // 重心補正 (パーツの頂点データに基づいて行われる)
         try {
-             let allVertices = [];
-             if (letterG.parts && letterG.parts.length > 1) {
-                  for (let i = 1; i < letterG.parts.length; i++) {
-                       if (letterG.parts[i] && letterG.parts[i].vertices) {
-                           allVertices = allVertices.concat(letterG.parts[i].vertices);
-                       }
-                  }
-             }
-             if (allVertices.length > 0) {
-                  let center = Vertices.centre(allVertices);
-                  Body.translate(letterG, { x: -center.x, y: -center.y });
-             } else {
-                  console.warn("Could not calculate center for Letter G (20 seg), vertices not found or empty.");
-             }
+            let allVertices = [];
+            if (letterG.parts && letterG.parts.length > 1) {
+                for (let i = 1; i < letterG.parts.length; i++) {
+                    if (letterG.parts[i] && letterG.parts[i].vertices) {
+                        allVertices = allVertices.concat(letterG.parts[i].vertices);
+                    }
+                }
+            }
+            if (allVertices.length > 0) {
+                let center = Vertices.centre(allVertices);
+                Body.translate(letterG, { x: -center.x, y: -center.y });
+                // console.log("Letter G centered based on vertices (arc rotated).");
+            } else {
+                console.warn("Could not calculate center for Letter G (arc rotated), vertices not found or empty.");
+            }
         } catch (e) {
-            console.error("Error centering Letter G (20 seg):", e);
+            console.error("Error centering Letter G (arc rotated):", e);
         }
 
-        // 最終的な位置と角度を設定
+        // 最終的な位置と角度を設定 (ボディ全体の初期角度は0)
         Body.setPosition(letterG, { x: x, y: y });
         Body.setAngle(letterG, 0);
-        console.log(`Created 20-segment Letter G body (ID: ${letterG.id}) - Adjusted straight parts`);
+        console.log(`Created 20-segment Letter G body (Arc rotated ID: ${letterG.id})`);
         return letterG;
     };
 
