@@ -112,7 +112,21 @@ window.GThrower = window.GThrower || {};
 
     // --- 文字を初期配置する関数 (変更なし) ---
     G.initializeLetters = function(letterChar, count) {
-        if (!G.world) { console.error('World not setup.'); return; }
+        if (!G.world) { console.error('World not setup for initializing letters.'); return; }
+
+        // G.activeLetters 配列がなければ初期化
+        G.activeLetters = G.activeLetters || [];
+
+        // 1. ★★★ 既存の文字があればワールドから削除 ★★★
+        if (G.activeLetters.length > 0) {
+             console.log(`Removing ${G.activeLetters.length} existing letters from world.`);
+             // ワールドからボディを削除
+             Composite.remove(G.world, G.activeLetters);
+             // 参照配列をクリア
+             G.activeLetters = [];
+        }
+
+        // 2. 新しい文字を作成・追加
         const creator = letterCreators[letterChar];
         if (!creator) {
             console.error(`Letter '${letterChar}' creator function not found! Check letter.js.`);
@@ -120,13 +134,21 @@ window.GThrower = window.GThrower || {};
         }
         const initialX = config.INTERACTION_CIRCLE_X;
         const initialY = config.INTERACTION_CIRCLE_Y;
+
+        console.log(`Initializing ${count} of letter '${letterChar}'...`);
         for (let i = 0; i < count; i++) {
             const letterBody = creator(initialX, initialY);
             if (letterBody) {
                 Composite.add(G.world, letterBody);
+                // 3. ★★★ 作成したボディの参照を保持 ★★★
+                G.activeLetters.push(letterBody);
+                console.log(`Added new letter body (ID: ${letterBody.id})`);
             }
         }
     };
+    // ★★★ 修正ここまで ★★★
+
+
 
     // --- スワイプモーション設定関数 (変更なし) ---
     G.setupSwipeMotion = function() {

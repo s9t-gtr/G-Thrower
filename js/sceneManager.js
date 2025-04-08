@@ -20,6 +20,7 @@ window.GThrower = window.GThrower || {};
     G.gameCleanupIntervalId = null;
     G.gameIsRunning = false;
     G.runner = null; // Matter.js Runner instance
+    G.activeLetters = [];
 
     // シーンを切り替える関数
     G.changeScene = function(newSceneId) {
@@ -209,6 +210,18 @@ window.GThrower = window.GThrower || {};
         ctx.stroke();
     };
 
+    // initializeLetters が既存削除と新規追加を行うので、それを呼び出すだけ
+    G.resetLetter = function() {
+        // ゲームが実行中でなければリセットしない (必要なら条件変更)
+        if (!G.gameIsRunning || !G.world) {
+             console.log("Cannot reset letter: Game not running or world not ready.");
+             return;
+        }
+        console.log("R key pressed - Resetting letter...");
+        // 'G' を1つ再生成 (既存削除もこの中で行われる)
+        G.initializeLetters('G', config.NUM_INITIAL_LETTERS);
+    };
+
 
     // --- Scene Initialization ---
     G.initScenes = function() {
@@ -276,6 +289,20 @@ window.GThrower = window.GThrower || {};
                 backToSelectButton.addEventListener('click', () => G.changeScene('stageSelect')); // 遷移先は 'stageSelect'
             } else { console.error("Back to select button (id: back-to-select-button) not found"); }
             console.log("Event listeners setup complete.");
+
+            console.log("Setting up keyboard listener for 'R' key...");
+            window.addEventListener('keydown', function(event) {
+                // 'R' または 'r' キーが押された場合 かつ ゲーム画面が表示中の場合
+                if (G.currentScene === 'game' && event.key.toLowerCase() === 'r') {
+                    // 他の修飾キー（Shift, Ctrl, Alt）が押されていないことも確認（オプション）
+                    if (!event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
+                        console.log("Detected 'R' key press in game scene.");
+                        G.resetLetter(); // リセット関数を呼び出す
+                    }
+                }
+                // 他のキー入力処理が必要ならここに追加
+            });
+            console.log("Keyboard listener setup complete.");
 
         } catch (error) {
             console.error("Error setting up event listeners:", error);
