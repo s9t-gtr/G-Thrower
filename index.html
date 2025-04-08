@@ -14,9 +14,39 @@
             font-family: sans-serif;
             overflow: hidden; /* 画面全体のスクロールを防ぐ */
         }
+        #title-screen {
+            /* --- 背景画像設定 ここから --- */
+            background-image: url('assets/title.png'); /* 画像ファイルのパスを指定 */
+            background-size: cover;           /* 画像を要素全体を覆うように拡大縮小 */
+            background-position: center center; /* 画像を中央に配置 */
+            background-repeat: no-repeat;     /* 画像を繰り返さない */
+            /* --- 背景画像設定 ここまで --- */
+
+            /* 背景画像に合わせて文字色などを調整 (任意) */
+            color: white; /* 例: 背景が暗い画像の場合、文字を白にする */
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6); /* 例: 文字に影を付けて読みやすくする */
+        }
+
+        /* タイトル文字やボタンのスタイルも背景に合わせて調整 (任意) */
+        #title-screen h1 {
+            /* color: white; */ /* 上で #title-screen に設定したので不要かも */
+            font-size: 3.5em; /* 少し大きくする例 */
+        }
+        #title-screen button {
+            background-color: rgba(0, 0, 0, 0.4); /* 例: ボタンの背景を半透明の黒に */
+            color: white;                       /* 例: ボタンの文字を白に */
+            border: 2px solid white;            /* 例: ボタンに白い枠線を追加 */
+            padding: 15px 35px;                 /* パディング調整例 */
+            font-size: 1.6em;                   /* フォントサイズ調整例 */
+        }
+        #title-screen button:hover {
+             background-color: rgba(0, 0, 0, 0.6); /* ホバー時の色調整例 */
+        }
+
+        /* 他の既存スタイル (.screen, .screen.active など) はそのまま */
         .screen {
-            display: none; /* 初期状態はすべての画面を非表示 */
-            position: absolute; /* 位置指定を可能に */
+            display: none;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
@@ -25,12 +55,13 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            /* ↓↓↓ タイトル以外は背景が透けないように背景色を設定しても良いかも ↓↓↓ */
+            /* background-color: #f0f0f0; */ /* 例 */
         }
-        /* 現在表示中の画面に適用されるクラス */
         .screen.active {
             display: flex;
         }
-
+        
         /* タイトル画面スタイル */
         #title-screen h1 {
             font-size: 3em;

@@ -38,7 +38,8 @@ window.GThrower = window.GThrower || {};
                 width: config.CANVAS_WIDTH,
                 height: config.CANVAS_HEIGHT,
                 wireframes: false,
-                background: config.BACKGROUND_COLOR
+                background: config.BACKGROUND_COLOR,
+                showSleeping: false
             }
         });
     };
