@@ -85,7 +85,7 @@ window.GThrower = window.GThrower || {};
 
             console.log("Adding obstacles and letters...");
             G.addDefaultTree();
-            G.initializeLetters('E', config.NUM_INITIAL_LETTERS);
+            G.initializeLetters('G', config.NUM_INITIAL_LETTERS); 
             G.setupSwipeMotion();
             console.log("Objects added and motion setup complete.");
 

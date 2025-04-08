@@ -22,7 +22,7 @@ GThrower.config = {
     INTERACTION_CIRCLE_RADIUS_SQ: 80 * 80, // 半径の2乗 (計算用)
 
     // --- 環境・物理関連 ---
-    GRAVITY_Y: 0.3,
+    GRAVITY_Y: 0.5,
     ENABLE_SLEEPING: true, // スリープ機能の有効化
 
     // --- 木関連 ---
