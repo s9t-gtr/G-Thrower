@@ -6,7 +6,7 @@ window.GThrower = window.GThrower || {};
     if (!Matter) { console.error('Error: Matter.js library is not loaded before sceneManager.js.'); return; }
     if (!G.config) { console.error('Error: GThrower.config is not loaded. Ensure constants.js is loaded before sceneManager.js.'); return; }
     if (!G.setupEngine || !G.setupRenderer || !G.createWalls || !G.setupMouseInteraction) { console.error('Error: Environment functions (setupEngine, etc.) not found. Ensure environment.js is loaded before sceneManager.js.'); return; }
-    if (!G.addDefaultTree) { console.error('Error: Obstacle function (addDefaultTree) not found. Ensure obstacle.js is loaded before sceneManager.js.'); return; }
+    // if (!G.addDefaultTree) { console.error('Error: Obstacle function (addDefaultTree) not found. Ensure obstacle.js is loaded before sceneManager.js.'); return; }
     if (!G.initializeLetters || !G.setupSwipeMotion) { console.error('Error: Letter functions (initializeLetters, etc.) not found. Ensure letter.js is loaded before sceneManager.js.'); return; }
 
     console.log("sceneManager.js: Dependencies checked."); // 依存関係チェック通過ログ
@@ -84,7 +84,8 @@ window.GThrower = window.GThrower || {};
             console.log("Matter environment setup complete.");
 
             console.log("Adding obstacles and letters...");
-            G.addDefaultTree();
+            // G.addDefaultTree();
+            G.addPinObstacles(6); // デフォルト設定でピンを追加 (数は12個)
             G.initializeLetters('G', config.NUM_INITIAL_LETTERS); // 文字は'G'のまま
             G.setupSwipeMotion();
             console.log("Objects added and motion setup complete.");
