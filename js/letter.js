@@ -57,16 +57,16 @@ window.GThrower = window.GThrower || {};
         const rightBarHeight = radius * 0.9;
         const rightBarAngle = Math.PI / 2;
         const rightBarCx = radius * 0.9;
-        const rightBarCy = radius * 0.4;
+        const rightBarCy = radius * 0.5;
         parts.push(Bodies.rectangle(rightBarCx, rightBarCy, rightBarHeight, partThickness, {
             angle: rightBarAngle,
             render: partRenderOptions // ★★★ 各パーツに render を設定 ★★★
         }));
         // 20. 内側横棒
-        const innerBarLength = radius * 1.0;
+        const innerBarLength = radius * 0.8;
         const innerBarAngle = 0;
         const innerBarCx = (rightBarCx - partThickness / 2) - innerBarLength / 2 + (partThickness * 0.2);
-        const innerBarCy = radius * 0.1;
+        const innerBarCy = radius * 0.2;
         parts.push(Bodies.rectangle(innerBarCx, innerBarCy, innerBarLength, partThickness, {
             angle: innerBarAngle,
             render: partRenderOptions // ★★★ 各パーツに render を設定 ★★★
