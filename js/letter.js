@@ -77,11 +77,10 @@ window.GThrower = window.GThrower || {};
             parts: parts,
             frictionAir: 0.035,
             friction: 0.1,
-            restitution: 0.35,
+            frictionStatic: 1.0,
+            restitution: 0.15,
             isSleeping: true,
             density: 0.0009,
-            // ★★★ 複合ボディ全体の render オプションは削除またはコメントアウト ★★★
-            // render: { /* ... */ }
         });
 
         // 重心補正
