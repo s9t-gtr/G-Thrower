@@ -159,6 +159,127 @@
             cursor: pointer;
         }
 
+
+        /* --- .iphone-like-button と :active は変更なし --- */
+.iphone-like-button {
+    width: 70px;
+    height: 70px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #E0E0E0 #B0B0B0 #989898 #B0B0B0;
+    border-radius: 15px;
+    background: linear-gradient(to bottom, #E8E8E8, #C8C8C8);
+    box-shadow:
+        0 4px 6px rgba(0, 0, 0, 0.3),
+        inset 0 3px 3px rgba(255, 255, 255, 0.7),
+        inset 0 -3px 3px rgba(0, 0, 0, 0.15),
+        inset 0 0 0 1.5px rgba(255, 255, 255, 0.8),
+        inset 0 0 0 2.5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    cursor: pointer;
+    position: relative;
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.iphone-like-button:active {
+    transform: scale(0.95);
+    box-shadow:
+        0 2px 3px rgba(0, 0, 0, 0.2),
+        inset 0 1px 2px rgba(255, 255, 255, 0.5),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+        inset 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+/* --- 新しいボタン用の Locked 状態スタイルを追加 --- */
+.iphone-like-button.locked {
+    opacity: 0.6; /* 半透明にする */
+    cursor: default; /* カーソルを通常に */
+    filter: grayscale(50%); /* 色味を少しグレーにする (任意) */
+    pointer-events: none; /* クリックイベントを受け付けなくする */
+
+    /* 必要であれば影なども調整 */
+    /* box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(0,0,0,0.05); */
+}
+/* --- 数字を入れる丸い縁取りのスタイル (ここを変更) --- */
+.number-circle {
+    width: 28px;
+    height: 28px;
+
+    /* --- 境界線の調整 --- */
+    /* border: 1px solid #ccc; */ /* ← 変更前 */
+    border-width: 2px; /* 少し太く (1px -> 2px) */
+    border-style: solid;
+    /* ボタン本体の縁の色味に合わせる */
+    border-color: #E8E8E8 #B8B8B8 #A0A0A0 #B8B8B8;
+    /* -------------------- */
+
+    border-radius: 50%; /* 円形 */
+
+    /* --- 背景の調整 --- */
+    /* background-color: white; */ /* ← 変更前 */
+    background: linear-gradient(to bottom, #FDFDFD, #F0F0F0); /* 明るい白系のグラデーション */
+    /* ------------------ */
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: black;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+
+    /* --- 影 (box-shadow) の調整 --- */
+    /* box-shadow: inset 0 1px 1px rgba(0,0,0,0.1); */ /* ← 変更前 */
+    box-shadow:
+        /* 外側のわずかな影で立体感を出す */
+        0 1px 1.5px rgba(0, 0, 0, 0.2),
+        /* 内側のハイライト (上部) */
+        inset 0 1.5px 1.5px rgba(255, 255, 255, 0.8),
+        /* 内側のシャドウ (下部) */
+        inset 0 -1px 1px rgba(0, 0, 0, 0.15),
+        /* ボーダー内側のハイライト (細めにしてギラギラ感を出す) */
+        inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
+    /* -------------------------- */
+
+    /* --- 位置指定 (変更なし) --- */
+    position: absolute;
+    left: 50%;
+    bottom: -14px; /* 円の高さ(28px)の半分 */
+    transform: translateX(-50%);
+}
+
+
+/* style.css */
+
+#button-container {
+    padding: 20px;
+    padding-bottom: 40px; /* 下の円がはみ出す分の余白 */
+
+    /* --- レイアウト調整 --- */
+    display: flex;       /* Flexboxレイアウトを有効に */
+    flex-wrap: wrap;     /* コンテナ幅で要素を折り返す */
+    gap: 20px;           /* ボタン間の上下左右の隙間を指定 */
+    /* justify-content: center; */ /* ボタンを中央揃えにしたい場合 */
+    /* ------------------ */
+}
+
+/* 他の CSS (.iphone-like-button, .number-circle など) は変更なし */
+
+/* --- ステージボタンコンテナのスタイル (変更なし) --- */
+#stage-select-screen h2 {
+    margin-bottom: 40px;
+}
+.stage-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px; /* 間隔を調整済みの値に */
+    max-width: 600px; /* 最大幅 (必要なら調整) */
+}
+/* -------------------------------------------- */
+
     </style>
 </head>
 <body>
@@ -171,19 +292,8 @@
     <div id="stage-select-screen" class="screen">
         <h2>ステージセレクト</h2>
         <div class="stage-buttons">
-            <button id="stage-1-button" data-stage-id="1">1</button>
-            <button class="locked">2</button>
-            <button class="locked">3</button>
-            <button class="locked">4</button>
-            <button class="locked">5</button>
-            <button class="locked">6</button>
-            <button class="locked">7</button>
-            <button class="locked">8</button>
-            <button class="locked">9</button>
-            <button class="locked">10</button>
-        </div>
+            </div>
         <button id="back-to-title-button" style="margin-top: 30px; padding: 10px 20px; font-size: 1.1em; cursor: pointer;">タイトルへ戻る</button>
-        </div>
     </div>
 
     <div id="game-container">
@@ -208,6 +318,6 @@
     <script src="js/obstacle.js"></script>
     <script src="js/letter.js"></script>
     <script src="js/sceneManager.js"></script> <script src="js/main.js"></script>
-
+    <script src="js/button.js"></script>
 </body>
 </html>
