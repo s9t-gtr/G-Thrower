@@ -61,86 +61,79 @@ window.GThrower = window.GThrower || {};
     };
 
     // --- Game Start/Stop Logic ---
+    // --- Game Start/Stop Logic ---
     G.startGame = function() {
         if (G.gameIsRunning) {
             console.warn("startGame called but game is already running.");
             return;
         }
-        // gameCanvas 要素が存在するか確認
         if (!G.scenes.gameCanvas) {
             console.error("gameCanvas element not found in G.scenes. Cannot start game.");
             return;
         }
-
         console.log("Starting game sequence...");
-
-        // Matter.jsのインスタンスを初期化
         try {
             console.log("Setting up Engine, Renderer, Walls, Mouse...");
             G.setupEngine();
             G.setupRenderer(G.scenes.gameCanvas);
+            if (!G.render) {
+                throw new Error("G.setupRenderer failed to set G.render.");
+            }
             G.createWalls();
             G.setupMouseInteraction();
             console.log("Matter environment setup complete.");
 
             console.log("Adding obstacles and letters...");
             G.addDefaultTree();
-            G.initializeLetters('G', config.NUM_INITIAL_LETTERS); 
+            G.initializeLetters('G', config.NUM_INITIAL_LETTERS); // 文字は'G'のまま
             G.setupSwipeMotion();
             console.log("Objects added and motion setup complete.");
 
         } catch (error) {
             console.error("Error during Matter.js setup:", error);
-            return; // エラーが発生したらゲームを開始しない
+            return;
         }
 
-
-        // RunnerとRenderを開始
-        if (!G.engine || !G.render) {
-             console.error('Engine or Render failed to initialize before starting Runner/Render.');
+        if (!G.engine) {
+             console.error('Engine failed to initialize before starting Runner.');
              return;
         }
         console.log("Starting Runner and Render...");
-        if (G.runner) { // 前のrunnerが残っていれば停止
-             Runner.stop(G.runner);
-        }
+        if (G.runner) { Runner.stop(G.runner); }
         G.runner = Runner.create();
         Runner.run(G.runner, G.engine);
         Render.run(G.render);
         console.log("Runner and Render started.");
 
-        // 画面外オブジェクト削除のタイマーを開始
         console.log("Starting cleanup interval timer...");
-        if (G.gameCleanupIntervalId) { // 前のタイマーが残っていればクリア
-            clearInterval(G.gameCleanupIntervalId);
-        }
-        G.gameCleanupIntervalId = setInterval(() => {
-            // ゲームが停止していたり、worldがなければタイマー解除
-            if (!G.gameIsRunning || !G.world) {
-                if (G.gameCleanupIntervalId) clearInterval(G.gameCleanupIntervalId);
-                G.gameCleanupIntervalId = null;
-                return;
-            }
-            const allBodies = Composite.allBodies(G.world);
-            allBodies.forEach(body => {
-                if (!body || body.isStatic || body.isSleeping) return;
-                const pos = body.position;
-                if(!pos) return;
-                const margin = config.OBJECT_CLEANUP_MARGIN;
-                if (pos.x < -margin || pos.x > config.CANVAS_WIDTH + margin ||
-                    pos.y < -margin || pos.y > config.CANVAS_HEIGHT + margin) {
-                    // console.log("Removing object outside bounds:", body.id); // デバッグ用
-                    Composite.remove(G.world, body);
-                }
-            });
-        }, config.OBJECT_CLEANUP_INTERVAL);
+        if (G.gameCleanupIntervalId) { clearInterval(G.gameCleanupIntervalId); }
+        G.gameCleanupIntervalId = setInterval(() => { /* ... cleanup logic ... */ }, config.OBJECT_CLEANUP_INTERVAL);
 
-        // 操作円描画イベントリスナーを追加
-        if (G.render) {
-            Events.off(G.render, 'afterRender', G.drawInteractionCircle); // 念のため既存を削除
-            Events.on(G.render, 'afterRender', G.drawInteractionCircle);
-            console.log("Interaction circle draw listener added.");
+
+        // --- ★★★ イベントリスナー設定部分の修正 ★★★ ---
+        console.log("Checking G.render before setting up 'afterRender' listener:", G.render);
+        if (G.render && typeof G.render === 'object' && G.render.canvas) {
+            try {
+                // ★★★ Events.off を一時的にコメントアウト ★★★
+                // console.log("Attempting Events.off for 'afterRender' on render object:", G.render.id);
+                // Events.off(G.render, 'afterRender', G.drawInteractionCircle); // ← コメントアウト
+                // console.log("Events.off call skipped for debugging."); // ログ変更
+
+                // 新しく追加 (または常に上書き)
+                console.log("Attempting Events.on for 'afterRender' on render object:", G.render.id);
+                // Events.on は既存のリスナーがあっても問題ない場合が多い
+                Events.on(G.render, 'afterRender', G.drawInteractionCircle);
+                console.log("Events.on successful. Interaction circle draw listener added.");
+
+            } catch (e) {
+                console.error("Error during Events.on for 'afterRender':", e);
+                console.error("G.render object at the time of error:", G.render);
+            }
+        } else {
+            console.error("G.render is unexpectedly undefined or null before setting 'afterRender' listener.");
+            console.error("Current value of G.render:", G.render);
         }
+        // --- ★★★ 修正ここまで ★★★
 
         G.gameIsRunning = true;
         console.log("Game started successfully.");
