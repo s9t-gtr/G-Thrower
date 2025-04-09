@@ -56,7 +56,22 @@ window.GThrower = window.GThrower || {};
                  height: config.CANVAS_HEIGHT,
                  wireframes: false,
                  background: 'transparent', // 背景は透明
-                 showSleeping: false
+                 showSleeping: false,
+
+                // ↓↓↓ デバッグ用オプションを確認・不要なら false または削除 ↓↓↓
+                showDebug: false,          // デフォルトは false
+                showAxes: false,           // デフォルトは false
+                showPositions: false,      // デフォルトは false
+                showVelocity: false,       // デフォルトは false
+                showCollisions: false,     // デフォルトは false
+                showSeparations: false,    // デフォルトは false
+                showBounds: false,         // デフォルトは false
+                showAngleIndicator: false, // デフォルトは false
+                showIds: false,            // デフォルトは false
+                showInternalEdges: false,  // デフォルトは false
+                // ★★★ 特にこれを確認 ★★★
+                showConvexHulls: false     // デフォルトは false (もし true なら false に変更 or 削除)
+                // ↑↑↑ 確認・修正ここまで ↑↑↑
              }
         });
 

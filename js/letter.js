@@ -16,18 +16,19 @@ window.GThrower = window.GThrower || {};
     // 文字作成関数を格納する内部オブジェクト
     const letterCreators = {};
 
-    // --- ★★★ 文字 'G' の作成関数 (各パーツに色設定) ★★★ ---
-    letterCreators['G'] = function(x, y) {
+       // --- ★★★ 文字 'G' の作成関数 (色を白に変更 - 修正版) ★★★ ---
+       letterCreators['G'] = function(x, y) {
         const scale = config.LETTER_SCALE;
         const radius = 38 * scale;
         const partThickness = 8 * scale;
-        // ↓↓↓ 各パーツに適用する共通のレンダーオプションを定義 ↓↓↓
+        // ↓↓↓ 各パーツに適用する共通のレンダーオプションを定義 (色を白に！) ↓↓↓
         const partRenderOptions = {
-            fillStyle: '#000000',   // 塗りつぶし色: 黒
-            strokeStyle: '#000000', // 輪郭線の色: 黒
+            fillStyle: '#FFFFFF',   // ★★★ 塗りつぶし色: 白 ★★★
+            strokeStyle: '#FFFFFF', // ★★★ 輪郭線の色: 白 (または '#000000' など) ★★★
             lineWidth: 1
         };
         // ↑↑↑ 定義ここまで ↑↑↑
+        const partOptions = {}; // 物理特性など、render以外の共通オプション用 (現在空)
 
         const parts = [];
 
@@ -47,66 +48,74 @@ window.GThrower = window.GThrower || {};
             const segmentAngle = currentAngle + Math.PI / 2;
             const rotatedSegmentAngle = segmentAngle + rotationAngle;
             parts.push(Bodies.rectangle(cx, cy, segmentLength, partThickness, {
+                ...partOptions, // render を含まないオプション
                 angle: rotatedSegmentAngle,
-                render: partRenderOptions // ★★★ 各パーツに render を設定 ★★★
+                render: partRenderOptions // ★★★ 各パーツに render 設定を適用 ★★★
             }));
         }
 
         // --- 直線部分の生成 (2本) ---
-        // 19. 右縦棒
         const rightBarHeight = radius * 0.9;
         const rightBarAngle = Math.PI / 2;
         const rightBarCx = radius * 0.9;
-        const rightBarCy = radius * 0.5;
+        const rightBarCy = radius * 0.4;
         parts.push(Bodies.rectangle(rightBarCx, rightBarCy, rightBarHeight, partThickness, {
-            angle: rightBarAngle,
-            render: partRenderOptions // ★★★ 各パーツに render を設定 ★★★
+             ...partOptions,
+             angle: rightBarAngle,
+             render: partRenderOptions // ★★★ 各パーツに render 設定を適用 ★★★
         }));
-        // 20. 内側横棒
-        const innerBarLength = radius * 0.8;
+        const innerBarLength = radius * 1.0;
         const innerBarAngle = 0;
         const innerBarCx = (rightBarCx - partThickness / 2) - innerBarLength / 2 + (partThickness * 0.2);
-        const innerBarCy = radius * 0.2;
+        const innerBarCy = radius * 0.1;
         parts.push(Bodies.rectangle(innerBarCx, innerBarCy, innerBarLength, partThickness, {
-            angle: innerBarAngle,
-            render: partRenderOptions // ★★★ 各パーツに render を設定 ★★★
+             ...partOptions,
+             angle: innerBarAngle,
+             render: partRenderOptions // ★★★ 各パーツに render 設定を適用 ★★★
         }));
 
         // --- 複合ボディの作成 ---
         const letterG = Body.create({
             parts: parts,
             frictionAir: 0.035,
-            friction: 0.1,
+            friction: 0.6,
             frictionStatic: 1.0,
-            restitution: 0.15,
+            restitution: 0.05,
             isSleeping: true,
             density: 0.0009,
+            // ★★★ 複合ボディ全体に render オプションを設定 (白色) ★★★
+            // render: {
+            //     fillStyle: '#FFFFFF',   // 塗りつぶし色: 白
+            //     strokeStyle: '#FFFFFF', // 輪郭線の色: 白 (見えなくなるので注意)
+            //     // strokeStyle: '#000000', // 輪郭線は黒にする場合
+            //     lineWidth: 1
+            // }
         });
 
-        // 重心補正
+        // 重心補正 (変更なし)
         try {
-            let allVertices = [];
-            if (letterG.parts && letterG.parts.length > 1) {
-                for (let i = 1; i < letterG.parts.length; i++) {
-                    if (letterG.parts[i] && letterG.parts[i].vertices) {
-                        allVertices = allVertices.concat(letterG.parts[i].vertices);
-                    }
-                }
-            }
-            if (allVertices.length > 0) {
-                let center = Vertices.centre(allVertices);
-                Body.translate(letterG, { x: -center.x, y: -center.y });
-            } else {
-                console.warn("Could not calculate center for Letter G (parts render), vertices not found.");
-            }
+             let allVertices = [];
+             if (letterG.parts && letterG.parts.length > 1) {
+                  for (let i = 1; i < letterG.parts.length; i++) { // i=1 から開始
+                       if (letterG.parts[i] && letterG.parts[i].vertices) {
+                           allVertices = allVertices.concat(letterG.parts[i].vertices);
+                       }
+                  }
+             }
+             if (allVertices.length > 0) {
+                  let center = Vertices.centre(allVertices);
+                  Body.translate(letterG, { x: -center.x, y: -center.y });
+             } else {
+                  console.warn("Could not calculate center for Letter G (white), vertices not found.");
+             }
         } catch (e) {
-        console.error("Error centering Letter G (parts render):", e);
+            console.error("Error centering Letter G (white):", e);
         }
 
-        // 最終的な位置と角度を設定
+        // 最終的な位置と角度を設定 (変更なし)
         Body.setPosition(letterG, { x: x, y: y });
         Body.setAngle(letterG, 0);
-        console.log(`Created 20-segment Letter G body with part render options (ID: ${letterG.id})`);
+        console.log(`Created 20-segment Letter G body with white color (ID: ${letterG.id})`);
         return letterG;
     };
 
