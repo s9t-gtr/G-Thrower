@@ -78,11 +78,19 @@
             margin-bottom: 40px;
         }
         .stage-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-            max-width: 600px;
+            display: flex;          /* ボタンを横に並べる */
+            flex-wrap: wrap;        /* コンテナ幅で折り返す */
+            justify-content: center;/* ボタン群を中央揃え */
+            gap: 15px;              /* ボタン間の隙間 (既存の値) */
+
+            /* ↓↓↓ コンテナの最大幅を設定し、5個で折り返すようにする ↓↓↓ */
+            /* ボタン幅(80px) * 5 + 隙間(15px) * 4 = 400 + 60 = 460px */
+            /* 少し余裕を持たせて 470px 程度にする */
+            max-width: 470px;
+            /* ↑↑↑ この行を追加または修正 ↑↑↑ */
+
+            margin-left: auto;      /* コンテナ自体を親要素内で中央揃え */
+            margin-right: auto;     /* コンテナ自体を親要素内で中央揃え */
         }
         .stage-buttons button {
             width: 80px;
