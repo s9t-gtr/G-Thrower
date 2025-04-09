@@ -4,8 +4,8 @@
 window.GThrower = window.GThrower || {};
 
 // --- 新しいキャンバスサイズを定義 ---
-const newCanvasWidth = 960;  // 16:9 の幅 (例)
-const newCanvasHeight = 540; // 16:9 の高さ (例)
+const newCanvasWidth = 1280;  // 16:9 の幅 (例)
+const newCanvasHeight = 720; // 16:9 の高さ (例)
 
 GThrower.config = {
     // --- キャンバス・表示関連 ---
