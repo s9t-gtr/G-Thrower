@@ -25,6 +25,7 @@ window.GThrower = window.GThrower || {};
     // G.pinContactInfo = ...; // ← 削除
     G.pinBodies = []; // ★★★ ピンのボディ参照を保持する配列 ★★★
     G.nearPinStartTime = null; // ★★★ ピンの近くにいる開始時刻 ★★★
+    G.selectedStage = 1; // ★★★ 選択されたステージ番号を保持 (デフォルトは1) ★★★
 
 
     // シーンを切り替える関数
@@ -200,15 +201,16 @@ G.handleAfterUpdate = function(event) {
 
             // ★★★ ステージ背景クラスを設定 ★★★
             if (G.scenes.game) { // #game-container 要素
-                const currentStage = 1; // 現在はステージ1固定
-                // 既存のステージクラスがあれば削除 (安全のため)
-                const existingClasses = G.scenes.game.className.match(/stage-\d+-background/g);
-                if (existingClasses) {
-                    G.scenes.game.classList.remove(...existingClasses);
+                // 既存のステージクラスがあれば削除 (より確実に)
+                const classList = G.scenes.game.classList;
+                for (let i = classList.length - 1; i >= 0; i--) {
+                    if (classList[i].startsWith('stage-') && classList[i].endsWith('-background')) {
+                        classList.remove(classList[i]);
+                    }
                 }
-                // 新しいステージクラスを追加
-                const stageClassName = `stage-${currentStage}-background`;
-                G.scenes.game.classList.add(stageClassName);
+                // 新しいステージクラスを追加 (選択されたステージ番号に基づいて)
+                const stageClassName = `stage-${G.selectedStage}-background`;
+                G.scenes.game.classList.add(stageClassName); // G.selectedStageの値に応じたクラスを追加
                 console.log(`Applied background class: ${stageClassName}`);
             } else {
                 console.error("Game container element not found for setting background.");
@@ -433,25 +435,38 @@ G.handleAfterUpdate = function(event) {
         console.log("All required scene elements found in HTML.");
 
 
-        // --- Event Listeners ---
-        try {
+          // --- Event Listeners ---
+          try {
             console.log("Setting up event listeners...");
             // Title Screen
             const startButton = document.getElementById('start-button');
-            if (startButton) {
-                startButton.addEventListener('click', () => G.changeScene('stageSelect')); // 遷移先は 'stageSelect'
-            } else { console.error("Start button (id: start-button) not found"); }
+            if (startButton) { startButton.addEventListener('click', () => G.changeScene('stageSelect')); }
+            else { console.error("Start button (id: start-button) not found"); }
 
-            // Stage Select Screen
-            const stage1Button = document.getElementById('stage-1-button');
-            if (stage1Button) {
-                stage1Button.addEventListener('click', () => G.changeScene('game')); // 遷移先は 'game'
-            } else { console.error("Stage 1 button (id: stage-1-button) not found"); }
+            // ↓↓↓ Stage Select Screen - 全てのボタンにリスナーを設定 ↓↓↓
+            // クラス名でボタン要素を全て取得 (locked クラスのチェックは不要に)
+            const stageButtons = document.querySelectorAll('.stage-buttons button.iphone-like-button');
+            if (stageButtons.length > 0) {
+                stageButtons.forEach(button => {
+                    const stageId = button.dataset.stageId; // data-stage-id 属性の値を取得
+                    if (stageId) {
+                        button.addEventListener('click', () => {
+                            G.selectedStage = parseInt(stageId, 10); // ここでステージ番号が設定される
+                            console.log(`Stage ${G.selectedStage} selected.`);
+                            G.changeScene('game'); // startGame が呼ばれる
+                        });
+                   }
+                });
+                console.log(`Added click listeners to ${stageButtons.length} stage buttons.`);
+            } else {
+                 console.error("No stage buttons with class 'iphone-like-button' found.");
+            }
             
+            // タイトルへ戻るボタン (変更なし)
             const backToTitleButton = document.getElementById('back-to-title-button');
-            if (backToTitleButton) {
-                backToTitleButton.addEventListener('click', () => G.changeScene('title')); // クリックでタイトル画面へ
-            } else { console.error("Back to title button (id: back-to-title-button) not found"); }
+            if (backToTitleButton) { backToTitleButton.addEventListener('click', () => G.changeScene('title')); }
+            else { console.error("Back to title button not found"); }
+            // ↑↑↑ 変更ここまで ↑↑↑
 
 
             // Clear Screen

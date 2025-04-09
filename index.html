@@ -14,38 +14,8 @@
             font-family: sans-serif;
             overflow: hidden; /* 画面全体のスクロールを防ぐ */
         }
-        #title-screen {
-            /* --- 背景画像設定 ここから --- */
-            background-image: url('assets/title.png'); /* 画像ファイルのパスを指定 */
-            background-size: cover;           /* 画像を要素全体を覆うように拡大縮小 */
-            background-position: center center; /* 画像を中央に配置 */
-            background-repeat: no-repeat;     /* 画像を繰り返さない */
-            /* --- 背景画像設定 ここまで --- */
-
-            /* 背景画像に合わせて文字色などを調整 (任意) */
-            color: white; /* 例: 背景が暗い画像の場合、文字を白にする */
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6); /* 例: 文字に影を付けて読みやすくする */
-        }
-
-        /* タイトル文字やボタンのスタイルも背景に合わせて調整 (任意) */
-        #title-screen h1 {
-            /* color: white; */ /* 上で #title-screen に設定したので不要かも */
-            font-size: 3.5em; /* 少し大きくする例 */
-        }
-        #title-screen button {
-            background-color: rgba(0, 0, 0, 0.4); /* 例: ボタンの背景を半透明の黒に */
-            color: white;                       /* 例: ボタンの文字を白に */
-            border: 2px solid white;            /* 例: ボタンに白い枠線を追加 */
-            padding: 15px 35px;                 /* パディング調整例 */
-            font-size: 1.6em;                   /* フォントサイズ調整例 */
-        }
-        #title-screen button:hover {
-             background-color: rgba(0, 0, 0, 0.6); /* ホバー時の色調整例 */
-        }
-
-        /* 他の既存スタイル (.screen, .screen.active など) はそのまま */
         .screen {
-            display: none;
+            display: none; /* 初期状態はすべての画面を非表示 */
             position: absolute;
             top: 0;
             left: 0;
@@ -55,198 +25,180 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            /* ↓↓↓ タイトル以外は背景が透けないように背景色を設定しても良いかも ↓↓↓ */
-            /* background-color: #f0f0f0; */ /* 例 */
         }
         .screen.active {
             display: flex;
         }
-        
-        /* タイトル画面スタイル */
+
+        /* --- タイトル画面 --- */
+        #title-screen {
+            background-image: url('assets/title.png');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+        }
+        /* ★★★ 重複を削除し、こちらに統合 ★★★ */
         #title-screen h1 {
-            font-size: 3em;
+            font-size: 3.5em; /* 大きい方を採用 */
             margin-bottom: 30px;
         }
         #title-screen button {
-            padding: 15px 30px;
-            font-size: 1.5em;
+            background-color: rgba(0, 0, 0, 0.4);
+            color: white;
+            border: 2px solid white;
+            padding: 15px 35px; /* 大きい方を採用 */
+            font-size: 1.6em;   /* 大きい方を採用 */
             cursor: pointer;
+            transition: background-color 0.2s ease; /* ホバー効果のため追加 */
         }
+        #title-screen button:hover {
+             background-color: rgba(0, 0, 0, 0.6);
+        }
+        /* ★★★ 重複削除ここまで ★★★ */
 
-        /* ステージセレクト画面タイトル */
+        /* --- ステージセレクト画面 --- */
         #stage-select-screen h2 {
             font-size: 2.8em;
-            margin-bottom: 60px; /* ボタンが立体的になったので間隔を調整 */
+            margin-bottom: 60px;
         }
-        /* ボタンコンテナ */
         .stage-buttons {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-/* ↓↓↓ 隙間と最大幅を大きいボタンに合わせて調整 ↓↓↓ */
-gap: 30px;              /* 例: 隙間を 25px -> 30px に */
-    max-width: 730px;       /* 例: ボタン幅120px * 5 + 隙間30px * 4 = 720px より少し余裕 */
-    /* ↑↑↑ 調整ここまで ↑↑↑ */
+            gap: 30px;
+            max-width: 730px; /* 120pxボタン * 5 + 30px隙間 * 4 */
             margin-left: auto;
             margin-right: auto;
         }
+        .iphone-like-button {
+            width: 120px;
+            height: 120px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #E0E0E0 #B0B0B0 #989898 #B0B0B0;
+            border-radius: 25px;
+            background-color: #E0E0E0;
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            box-shadow:
+                0 6px 9px rgba(0, 0, 0, 0.3),
+                inset 0 4px 4px rgba(255, 255, 255, 0.7),
+                inset 0 -4px 4px rgba(0, 0, 0, 0.15),
+                inset 0 0 0 2px rgba(255, 255, 255, 0.8),
+                inset 0 0 0 3px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            position: relative;
+            font-family: 'Helvetica Neue', 'Arial', sans-serif;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            /* overflow: hidden; */ /* ← はみ出し表示のためにコメントアウトのまま */
+        }
+        .iphone-like-button:active {
+            transform: scale(0.96);
+            box-shadow:
+                0 3px 5px rgba(0, 0, 0, 0.2),
+                inset 0 2px 3px rgba(255, 255, 255, 0.5),
+                inset 0 -2px 3px rgba(0, 0, 0, 0.1),
+                inset 0 0 0 1.5px rgba(255, 255, 255, 0.5),
+                inset 0 0 0 2.5px rgba(0, 0, 0, 0.05);
+        }
+        /* 各ステージボタンの背景画像指定 */
+        .stage-buttons button.iphone-like-button[data-stage-id="1"] { background-image: url('assets/images/icons/1_kiyomizu_temple.png'); }
+        .stage-buttons button.iphone-like-button[data-stage-id="2"] { background-image: url('assets/images/icons/2_shachihoko.png'); }
+        .stage-buttons button.iphone-like-button[data-stage-id="3"] { background-image: url('assets/images/icons/3_tokyo_tower.png'); }
+        .stage-buttons button.iphone-like-button[data-stage-id="4"] { background-image: url('assets/images/icons/4_Five-storied_pagoda.png'); }
+        .stage-buttons button.iphone-like-button[data-stage-id="5"] { background-image: url('assets/images/icons/5_statue_of_liberty.png'); }
+        .stage-buttons button.iphone-like-button[data-stage-id="6"] { background-image: url('assets/images/icons/6_eiffel_tower.png'); }
+        .stage-buttons button.iphone-like-button[data-stage-id="7"] { background-image: url('assets/images/icons/7_colosseum.png'); }
+        .stage-buttons button.iphone-like-button[data-stage-id="8"] { background-image: url('assets/images/icons/8_moai.png'); }
+        .stage-buttons button.iphone-like-button[data-stage-id="9"] { background-image: url('assets/images/icons/9_mont_saint-michel.png'); }
+        .stage-buttons button.iphone-like-button[data-stage-id="10"] { background-image: url('assets/images/icons/10_sphinx.png'); }
+        /* 数字を入れる丸い縁取りのスタイル */
+        .number-circle {
+            width: 40px;
+            height: 40px;
+            border-width: 3px;
+            border-style: solid;
+            border-color: #E8E8E8 #B8B8B8 #A0A0A0 #B8B8B8;
+            border-radius: 50%;
+            background: linear-gradient(to bottom, #FDFDFD, #F0F0F0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* ★★★ フォントサイズを小さく戻す ★★★ */
+            font-size: 20px; /* 24pxから変更 */
+            font-weight: bold;
+            color: black;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            box-shadow:
+                0 1.5px 2px rgba(0, 0, 0, 0.2),
+                inset 0 2px 2px rgba(255, 255, 255, 0.8),
+                inset 0 -1.5px 1.5px rgba(0, 0, 0, 0.15),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+            position: absolute;
+            left: 50%;
+            bottom: -20px; /* 高さ40pxの半分 */
+            transform: translateX(-50%);
+            filter: none;
+            z-index: 1; /* ボタンより手前に */
+        }
+        /* ★★★ 不要な .locked スタイル削除 ★★★ */
+        /* .stage-buttons button.locked { ... } */
 
-/* iPhone風ボタンスタイルを修正 */
-.iphone-like-button {
-    /* ↓↓↓ サイズ、ボーダー、角丸、影を調整 ↓↓↓ */
-    width: 120px;           /* 例: 70px -> 120px */
-    height: 120px;          /* 例: 70px -> 120px */
-    border-width: 5px;      /* 例: 4px -> 5px */
-    border-color: #E0E0E0 #B0B0B0 #989898 #B0B0B0;
-    border-radius: 25px;    /* 例: 15px -> 25px (サイズに合わせて調整) */
-    background-color: #E0E0E0;
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    box-shadow: /* 影もボタンサイズに合わせて少し大きく */
-        0 6px 9px rgba(0, 0, 0, 0.3),
-        inset 0 4px 4px rgba(255, 255, 255, 0.7),
-        inset 0 -4px 4px rgba(0, 0, 0, 0.15),
-        inset 0 0 0 2px rgba(255, 255, 255, 0.8),
-        inset 0 0 0 3px rgba(0, 0, 0, 0.1);
-    /* ↑↑↑ 調整ここまで ↑↑↑ */
-    cursor: pointer;
-    position: relative;
-    font-family: 'Helvetica Neue', 'Arial', sans-serif;
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-    /* overflow: hidden; */
-}
-
-/* :active スタイルの影も調整 */
-.iphone-like-button:active {
-    transform: scale(0.96); /* スケールも微調整 */
-    box-shadow: /* 押したときの影も調整 */
-        0 3px 5px rgba(0, 0, 0, 0.2),
-        inset 0 2px 3px rgba(255, 255, 255, 0.5),
-        inset 0 -2px 3px rgba(0, 0, 0, 0.1),
-        inset 0 0 0 1.5px rgba(255, 255, 255, 0.5),
-        inset 0 0 0 2.5px rgba(0, 0, 0, 0.05);
-}
-
-/* Locked 状態スタイル (影を通常時に合わせる) */
-.iphone-like-button.locked {
-    opacity: 0.6;
-    cursor: default;
-    filter: grayscale(50%);
-    pointer-events: none;
-    transform: none !important;
-    /* 通常時の影 (調整後) を適用 */
-    box-shadow:
-        0 6px 9px rgba(0, 0, 0, 0.3),
-        inset 0 4px 4px rgba(255, 255, 255, 0.7),
-        inset 0 -4px 4px rgba(0, 0, 0, 0.15),
-        inset 0 0 0 2px rgba(255, 255, 255, 0.8),
-        inset 0 0 0 3px rgba(0, 0, 0, 0.1);
-}
-/* 数字を入れる丸い縁取りのスタイル */
-.number-circle {
-    /* ↓↓↓ ボタンサイズに合わせて調整 ↓↓↓ */
-    width: 40px;            /* 例: 28px -> 40px */
-    height: 40px;           /* 例: 28px -> 40px */
-    border-width: 3px;      /* 例: 2px -> 3px */
-    font-size: 24px;        /* 例: 18px -> 24px */
-    bottom: -20px;          /* 例: 新しい高さ(40px)の半分 */
-    /* ↑↑↑ 調整ここまで ↑↑↑ */
-    border-style: solid;
-    border-color: #E8E8E8 #B8B8B8 #A0A0A0 #B8B8B8;
-    border-radius: 50%;
-    background: linear-gradient(to bottom, #FDFDFD, #F0F0F0);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    color: black;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    box-shadow: /* 影も少し調整 */
-        0 1.5px 2px rgba(0, 0, 0, 0.2),
-        inset 0 2px 2px rgba(255, 255, 255, 0.8),
-        inset 0 -1.5px 1.5px rgba(0, 0, 0, 0.15),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.7);
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    filter: none;
-}
-
-
-        
-        /* ↓↓↓ 各ステージボタンの背景画像を指定 (ファイル名が 1.png, 2.png ... の場合) ↓↓↓ */
-        .stage-buttons button[data-stage-id="1"] { background-image: url('assets/images/icons/1_kiyomizu_temple.png'); }
-        .stage-buttons button[data-stage-id="2"] { background-image: url('assets/images/icons/2_shachihoko.png'); }
-        .stage-buttons button[data-stage-id="3"] { background-image: url('assets/images/icons/3_tokyo_tower.png'); }
-        .stage-buttons button[data-stage-id="4"] { background-image: url('assets/images/icons/4_Five-storied_pagoda.png'); }
-        .stage-buttons button[data-stage-id="5"] { background-image: url('assets/images/icons/5_statue_of_liberty.png'); }
-        .stage-buttons button[data-stage-id="6"] { background-image: url('assets/images/icons/6_eiffel_tower.png'); }
-        .stage-buttons button[data-stage-id="7"] { background-image: url('assets/images/icons/7_colosseum.png'); }
-        .stage-buttons button[data-stage-id="8"] { background-image: url('assets/images/icons/8_moai.png'); }
-        .stage-buttons button[data-stage-id="9"] { background-image: url('assets/images/icons/9_mont_saint-michel.png'); }
-        .stage-buttons button[data-stage-id="10"] { background-image: url('assets/images/icons/10_sphinx.png'); }
-        /* ↑↑↑ 追加ここまで ↑↑↑ */
-
-/* タイトルへ戻るボタン */
-#back-to-title-button {
-    /* ↓↓↓ 上のボタン群との間隔を調整 ↓↓↓ */
-    margin-top: 60px;       /* 例: ボタンと数字サークルが大きくなった分、間隔を広げる */
-    /* ↑↑↑ 調整ここまで ↑↑↑ */
-    font-size: 1.2em; /* 他の要素とのバランスを見て調整 */
-    padding: 10px 20px;
-    cursor: pointer;
-    background-color: rgba(100, 100, 100, 0.6);
-    color: white;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    border-radius: 8px;
-    transition: background-color 0.1s ease;
-    font-family: 'Helvetica Neue', 'Arial', sans-serif;
-}
+        /* タイトルへ戻るボタン */
+        #back-to-title-button {
+            margin-top: 60px;
+            font-size: 1.2em;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: rgba(100, 100, 100, 0.6);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            transition: background-color 0.1s ease;
+            font-family: 'Helvetica Neue', 'Arial', sans-serif;
+        }
         #back-to-title-button:hover {
             background-color: rgba(80, 80, 80, 0.7);
         }
 
-        .stage-buttons button.locked {
-            background-color: #eee;
-            color: #aaa;
-            cursor: default;
-        }
-
-        /* ゲーム画面コンテナ */
+        /* --- ゲーム画面 --- */
         #game-container {
-            /* screenクラスのflexを上書き */
-            display: none; /* 初期状態は非表示 */
-            justify-content: initial;
-            align-items: initial;
-            position: relative; /* 子要素の位置基準用 */
-            /* Canvas等が中央に来るように調整 */
+            display: none;
+            position: relative;
             background-color: transparent;
             width: auto;
             height: auto;
         }
         #game-container.active {
-            display: block; /* 表示時は block に */
-        }
-        canvas {
-            border: 1px solid #ccc;
-            background-color: #fff;
             display: block;
         }
-        /* Canvas要素の背景も透明に */
         canvas#gameCanvas {
-            background-color: transparent !important; /* CSSの優先度によっては !important が必要かも */
-            display: block; /* 維持 */
-            border: 1px solid #ccc; /* 枠線はお好みで */
+            background-color: transparent !important;
+            display: block;
+            border: 1px solid #ccc;
         }
-        #game-container.stage-1-background { /* IDとクラスを組み合わせる */
-            background-image: url('Assets/images/backgrounds/kiyomizu_temple.png'); /* 画像パス */
-            background-size: cover;           /* 全体を覆う */
-            background-position: center center; /* 中央表示 */
-            background-repeat: no-repeat;     /* 繰り返しなし */
+        /* ステージ背景 */
+        #game-container.stage-1-background { background-image: url('assets/images/backgrounds/1_kiyomizu_temple.png'); }
+        #game-container.stage-2-background { background-image: url('assets/images/backgrounds/2_shachihoko.png'); }
+        #game-container.stage-3-background { background-image: url('assets/images/backgrounds/3_tokyo_tower.png'); } /* 仮ファイル名 */
+        #game-container.stage-4-background { background-image: url('assets/images/backgrounds/4_Five-storied_pagoda.png'); } /* 仮ファイル名 */
+        #game-container.stage-5-background { background-image: url('assets/images/backgrounds/5.png'); } /* 仮ファイル名 */
+        #game-container.stage-6-background { background-image: url('assets/images/backgrounds/6.png'); } /* 仮ファイル名 */
+        #game-container.stage-7-background { background-image: url('assets/images/backgrounds/7.png'); } /* 仮ファイル名 */
+        #game-container.stage-8-background { background-image: url('assets/images/backgrounds/8.png'); } /* 仮ファイル名 */
+        #game-container.stage-9-background { background-image: url('assets/images/backgrounds/9.png'); } /* 仮ファイル名 */
+        #game-container.stage-10-background { background-image: url('assets/images/backgrounds/10.png'); }/* 仮ファイル名 */
+        /* 背景表示共通設定 */
+        #game-container[class*="stage-"] {
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
         }
         #instructions {
-            position: absolute; /* 位置調整 */
+            position: absolute;
             top: 10px;
             left: 50%;
             transform: translateX(-50%);
@@ -254,21 +206,18 @@ gap: 30px;              /* 例: 隙間を 25px -> 30px に */
             padding: 5px 10px;
             border-radius: 5px;
             font-size: 0.9em;
-            z-index: 10; /* Canvasより手前に */
-        }
-        /* 仮のクリアボタン */
-        #clear-trigger-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 5px 10px;
-            cursor: pointer;
             z-index: 10;
+            line-height: 1.4; /* 少し行間調整 */
         }
+        #instructions span {
+            font-size: 0.9em; /* 相対サイズなので変更なし */
+        }
+        /* ★★★ 不要な #clear-trigger-button スタイル削除 ★★★ */
+        /* #clear-trigger-button { ... } */
 
-        /* クリア画面スタイル */
+        /* --- クリア画面 --- */
         #clear-screen {
-            background-color: rgba(0, 0, 0, 0.5); /* 半透明の背景 */
+            background-color: rgba(0, 0, 0, 0.5);
         }
         #clear-screen div {
             background-color: white;
@@ -278,7 +227,7 @@ gap: 30px;              /* 例: 隙間を 25px -> 30px に */
         }
         #clear-screen h2 {
             font-size: 2.5em;
-            color: #2ecc71; /* 緑色 */
+            color: #2ecc71;
             margin-bottom: 20px;
         }
         #clear-screen button {
@@ -302,43 +251,24 @@ gap: 30px;              /* 例: 隙間を 25px -> 30px に */
             <button id="stage-1-button" data-stage-id="1" class="iphone-like-button">
                 <span class="number-circle">1</span>
             </button>
-            <button class="locked iphone-like-button" data-stage-id="2">
-                <span class="number-circle">2</span>
-            </button>
-            <button class="locked iphone-like-button" data-stage-id="3">
-                <span class="number-circle">3</span>
-            </button>
-            <button class="locked iphone-like-button" data-stage-id="4">
-                <span class="number-circle">4</span>
-            </button>
-            <button class="locked iphone-like-button" data-stage-id="5">
-                <span class="number-circle">5</span>
-            </button>
-            <button class="locked iphone-like-button" data-stage-id="6">
-                <span class="number-circle">6</span>
-            </button>
-            <button class="locked iphone-like-button" data-stage-id="7">
-                <span class="number-circle">7</span>
-            </button>
-            <button class="locked iphone-like-button" data-stage-id="8">
-                <span class="number-circle">8</span>
-            </button>
-            <button class="locked iphone-like-button" data-stage-id="9">
-                <span class="number-circle">9</span>
-            </button>
-            <button class="locked iphone-like-button" data-stage-id="10">
-                <span class="number-circle">10</span>
-            </button>
-            </div>
+            <button data-stage-id="2" class="iphone-like-button"> <span class="number-circle">2</span> </button>
+            <button data-stage-id="3" class="iphone-like-button"> <span class="number-circle">3</span> </button>
+            <button data-stage-id="4" class="iphone-like-button"> <span class="number-circle">4</span> </button>
+            <button data-stage-id="5" class="iphone-like-button"> <span class="number-circle">5</span> </button>
+            <button data-stage-id="6" class="iphone-like-button"> <span class="number-circle">6</span> </button>
+            <button data-stage-id="7" class="iphone-like-button"> <span class="number-circle">7</span> </button>
+            <button data-stage-id="8" class="iphone-like-button"> <span class="number-circle">8</span> </button>
+            <button data-stage-id="9" class="iphone-like-button"> <span class="number-circle">9</span> </button>
+            <button data-stage-id="10" class="iphone-like-button"> <span class="number-circle">10</span> </button>
+        </div>
         <button id="back-to-title-button">タイトルへ戻る</button>
-    </div>
-    </div>
+        </div>
 
     <div id="game-container">
         <div id="instructions">
             左下の円の中で文字をクリック（タップ）して掴み、<br>
-            ドラッグ（スワイプ）して投げよう！
-            <span style="font-size: 0.9em;">（ Gキーでリトライ ）
+            ドラッグ（スワイプ）して投げよう！<br>
+            <span style="font-size: 0.9em;">（ Gキーでリトライ ）</span>
         </div>
         <canvas id="gameCanvas"></canvas>
     </div>
@@ -355,7 +285,6 @@ gap: 30px;              /* 例: 隙間を 25px -> 30px に */
     <script src="js/environment.js"></script>
     <script src="js/obstacle.js"></script>
     <script src="js/letter.js"></script>
-    <script src="js/sceneManager.js"></script> <script src="js/main.js"></script>
-
-</body>
+    <script src="js/sceneManager.js"></script>
+    <script src="js/main.js"></script> </body>
 </html>
