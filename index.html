@@ -114,6 +114,7 @@
             align-items: initial;
             position: relative; /* 子要素の位置基準用 */
             /* Canvas等が中央に来るように調整 */
+            background-color: transparent;
             width: auto;
             height: auto;
         }
@@ -124,6 +125,18 @@
             border: 1px solid #ccc;
             background-color: #fff;
             display: block;
+        }
+        /* Canvas要素の背景も透明に */
+        canvas#gameCanvas {
+            background-color: transparent !important; /* CSSの優先度によっては !important が必要かも */
+            display: block; /* 維持 */
+            border: 1px solid #ccc; /* 枠線はお好みで */
+        }
+        #game-container.stage-1-background { /* IDとクラスを組み合わせる */
+            background-image: url('Assets/images/backgrounds/kiyomizu_temple.png'); /* 画像パス */
+            background-size: cover;           /* 全体を覆う */
+            background-position: center center; /* 中央表示 */
+            background-repeat: no-repeat;     /* 繰り返しなし */
         }
         #instructions {
             position: absolute; /* 位置調整 */

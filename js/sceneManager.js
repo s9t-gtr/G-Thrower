@@ -198,6 +198,22 @@ G.handleAfterUpdate = function(event) {
             G.setupMouseInteraction();
             console.log("Matter environment setup complete.");
 
+            // ★★★ ステージ背景クラスを設定 ★★★
+            if (G.scenes.game) { // #game-container 要素
+                const currentStage = 1; // 現在はステージ1固定
+                // 既存のステージクラスがあれば削除 (安全のため)
+                const existingClasses = G.scenes.game.className.match(/stage-\d+-background/g);
+                if (existingClasses) {
+                    G.scenes.game.classList.remove(...existingClasses);
+                }
+                // 新しいステージクラスを追加
+                const stageClassName = `stage-${currentStage}-background`;
+                G.scenes.game.classList.add(stageClassName);
+                console.log(`Applied background class: ${stageClassName}`);
+            } else {
+                console.error("Game container element not found for setting background.");
+            }
+
             console.log("Adding obstacles and letters...");
             if (G.engine) {
                 // Collision リスナー削除 (不要)
@@ -212,14 +228,22 @@ G.handleAfterUpdate = function(event) {
                 console.error("Cannot add afterUpdate listener because G.engine is not defined!");
            }
            console.log("Adding obstacles and letters...");
-           // ↓↓↓ addPinObstacles の戻り値を受け取る ↓↓↓
-           const createdPins = G.addPinObstacles(6); // ピンの数は6個
-           if (createdPins && createdPins.length > 0) {
-                G.pinBodies = createdPins; // ★★★ ピンの参照を保持 ★★★
-                console.log(`Stored references to ${G.pinBodies.length} pins.`);
-           } else {
-                console.warn("No pin bodies returned from addPinObstacles.");
-           }
+            // 配置したい座標と半径を指定 (例: 画面右側の中央やや上)
+            const pinX = config.CANVAS_WIDTH * 0.8;
+            const pinY = config.CANVAS_HEIGHT * 0.4;
+            const pinRadius = 4; // 半径を少し大きくする例
+
+            // 新しい関数を呼び出し、戻り値を受け取る
+            const createdPin = G.addSinglePin(pinX, pinY, pinRadius);
+
+            // 戻り値が有効なら G.pinBodies 配列に格納
+            if (createdPin) {
+                G.pinBodies = [createdPin]; // ★★★ 配列に単一のピンを入れる ★★★
+                console.log(`Stored reference to the single pin (ID: ${createdPin.id}) at (${pinX}, ${pinY}).`);
+            } else {
+                G.pinBodies = []; // ピン作成失敗時は空にする
+                console.warn("Failed to create the single pin.");
+            }
            // ↑↑↑ 変更ここまで ↑↑↑
            G.initializeLetters('G', config.NUM_INITIAL_LETTERS);
            G.setupSwipeMotion();
@@ -281,6 +305,14 @@ G.handleAfterUpdate = function(event) {
 
         // Runner停止
         try { if (G.runner) Runner.stop(G.runner); } catch (e) { console.error("Error stopping Runner:", e); } finally { G.runner = null; }
+
+        if (G.scenes.game) {
+            const existingClasses = G.scenes.game.className.match(/stage-\d+-background/g);
+            if (existingClasses) {
+                 G.scenes.game.classList.remove(...existingClasses);
+                 console.log("Removed stage background classes.");
+            }
+       }
 
         // Render停止とリスナー削除
         try {

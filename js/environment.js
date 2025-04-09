@@ -26,23 +26,59 @@ window.GThrower = window.GThrower || {};
         G.world.gravity.y = config.GRAVITY_Y;
     };
 
-    // --- Renderer Setup ---
-    G.setupRenderer = function(canvas) {
-        if (!G.engine) { console.error('Engine not setup.'); return; }
-        canvas.width = config.CANVAS_WIDTH;
-        canvas.height = config.CANVAS_HEIGHT;
-        G.render = Render.create({ // GThrowerオブジェクトにrenderを格納
-            canvas: canvas,
-            engine: G.engine,
-            options: {
-                width: config.CANVAS_WIDTH,
-                height: config.CANVAS_HEIGHT,
-                wireframes: false,
-                background: config.BACKGROUND_COLOR,
-                showSleeping: false
-            }
+   // --- ★★★ setupRenderer 関数 (SyntaxError修正) ★★★ ---
+   G.setupRenderer = function(canvas) {
+    // 1. エンジンの存在チェック
+    if (!G.engine) {
+        console.error('Engine not setup before setupRenderer.');
+        G.render = null;
+        return;
+    }
+    // 2. 引数 canvas の有効性チェック
+    if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
+        console.error(`Invalid canvas element passed to setupRenderer:`, canvas);
+        G.render = null;
+        return;
+    }
+    console.log("Canvas element received in setupRenderer:", canvas.id);
+
+    canvas.width = config.CANVAS_WIDTH;
+    canvas.height = config.CANVAS_HEIGHT;
+
+    // 3. Render.create の実行と結果確認
+    try { // ← try ブロック開始
+        console.log("Attempting to create Render...");
+        G.render = Render.create({
+             canvas: canvas,
+             engine: G.engine,
+             options: {
+                 width: config.CANVAS_WIDTH,
+                 height: config.CANVAS_HEIGHT,
+                 wireframes: false,
+                 background: 'transparent', // 背景は透明
+                 showSleeping: false
+             }
         });
-    };
+
+        if (G.render) {
+             console.log("Render object created successfully. ID:", G.render.id);
+             if (G.render.canvas && G.render.canvas instanceof HTMLCanvasElement) {
+                  console.log("Render.canvas is correctly set:", G.render.canvas.id);
+             } else {
+                  console.error("CRITICAL: Render object created BUT render.canvas is missing or invalid!");
+                  G.render = null;
+             }
+        } else {
+             console.error("CRITICAL: Render.create did not return a render object!");
+             G.render = null;
+        }
+    // ↓↓↓ 不足していた catch ブロックを追加 ↓↓↓
+    } catch (e) {
+         console.error("Error occurred during Render.create:", e);
+         G.render = null; // エラー発生時は null を設定
+    }
+    // ↑↑↑ catch ブロック終了 ↑↑↑
+};
 
     // --- Wall Creation ---
     G.createWalls = function() {
