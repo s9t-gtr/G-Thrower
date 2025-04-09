@@ -14,13 +14,18 @@ window.GThrower = window.GThrower || {};
     const config = G.config;
     const { Engine, Render, Runner, Events, Composite, Body } = Matter;
 
-    // --- Scene Management ---
+    // --- Scene Management & Game State ---
     G.scenes = {};
     G.currentScene = null;
     G.gameCleanupIntervalId = null;
     G.gameIsRunning = false;
-    G.runner = null; // Matter.js Runner instance
+    G.runner = null;
     G.activeLetters = [];
+    G.isGameCleared = false;
+    // G.pinContactInfo = ...; // ← 削除
+    G.pinBodies = []; // ★★★ ピンのボディ参照を保持する配列 ★★★
+    G.nearPinStartTime = null; // ★★★ ピンの近くにいる開始時刻 ★★★
+
 
     // シーンを切り替える関数
     G.changeScene = function(newSceneId) {
@@ -61,6 +66,112 @@ window.GThrower = window.GThrower || {};
         }
     };
 
+// --- ★★★ 近接判定用関数 (afterUpdateイベントハンドラ) ★★★ ---
+G.handleAfterUpdate = function(event) {
+    // クリア済み、ゲーム中でない、文字Gやピン、エンジンがない場合は処理中断
+    if (G.isGameCleared || !G.gameIsRunning || !G.activeLetters || G.activeLetters.length === 0 || !G.pinBodies || G.pinBodies.length === 0 || !G.engine || !G.engine.timing) { // G.engine と G.engine.timing の存在もチェック
+        if (G.nearPinStartTime !== null) {
+                // console.log("Resetting near pin timer (pre-checks failed)."); // デバッグ用
+                G.nearPinStartTime = null;
+        }
+        return;
+    }
+
+    const letterBody = G.activeLetters[0];
+    if (!letterBody || !letterBody.position) return; // 念のためチェック
+
+    let isNearAnyPin = false;
+    const letterRadius = (38 * config.LETTER_SCALE); // 文字のおおよその半径
+    const pinRadius = 7; // obstacle.js で定義したピンの半径 (本当は config にあるべき)
+    const proximityMargin = 10; // 「近く」と判定する追加のマージン (ピクセル)
+    const distanceThreshold = letterRadius + pinRadius + proximityMargin;
+    const distanceThresholdSq = distanceThreshold * distanceThreshold; // 比較用の2乗値
+
+    // --- 1. 床に接触していないかチェック ---
+    const floorSurfaceY = config.CANVAS_HEIGHT - (config.WALL_THICKNESS / 2);
+    const bodyBottomY = letterBody.position.y + letterRadius * 1.1; // 下端を推定 (マージン込)
+    const clearFloorThreshold = floorSurfaceY - 5; // 床の少し上
+    const isAboveFloor = bodyBottomY < clearFloorThreshold;
+
+    if (!isAboveFloor) {
+         // 床に触れている場合はタイマーリセット
+         if (G.nearPinStartTime !== null) {
+              console.log("[Clear Check] Resetting near pin timer (Touching floor).");
+              G.nearPinStartTime = null;
+         }
+         return; // クリア判定に進まない
+    }
+
+    // --- 2. ピンとの近接判定 ---
+    let nearestPinDistSq = Infinity; // 最も近いピンとの距離の2乗
+    let nearPinId = null;            // 最も近いピンのID
+
+    for (let i = 0; i < G.pinBodies.length; i++) {
+        const pinBody = G.pinBodies[i];
+        if (!pinBody || !pinBody.position) continue;
+
+        const dx = letterBody.position.x - pinBody.position.x;
+        const dy = letterBody.position.y - pinBody.position.y;
+        const distSq = dx * dx + dy * dy;
+
+        if (distSq < distanceThresholdSq) {
+            isNearAnyPin = true;
+            if (distSq < nearestPinDistSq) { // 最も近いピンを更新
+                nearestPinDistSq = distSq;
+                nearPinId = pinBody.id;
+            }
+            // ★★★ デバッグログ ★★★
+            // 頻繁に出力されるため、必要に応じてコメント解除
+            // console.log(`[Debug] Letter G is near Pin ${i} (ID: ${pinBody.id}). DistSq: ${distSq.toFixed(0)}`);
+        }
+    }
+
+    // デバッグ用に最も近いピン情報を出力（近くにいる場合のみ）
+    if (isNearAnyPin) {
+        console.log(`[Clear Check] Letter G is near Pin ID: ${nearPinId}. Measuring time...`);
+    }
+
+
+    // --- 3. 時間計測とクリア判定 ---
+    if (isNearAnyPin) {
+        // ピンの近くにいる状態が始まった場合
+        if (G.nearPinStartTime === null) {
+            console.log("[Clear Check] Letter G entered near pin zone. Starting timer.");
+            // ↓↓↓ Matter.Engine.now を G.engine.timing.timestamp に変更 ↓↓↓
+            G.nearPinStartTime = G.engine.timing.timestamp; // ★修正★
+            console.log(`   -> Start time set to: ${G.nearPinStartTime.toFixed(0)}`);
+        } else {
+            // ピンの近くにいる状態が継続している場合
+            const currentTime = G.engine.timing.timestamp;
+            const elapsedTime = currentTime - G.nearPinStartTime;
+            const requiredTime = 2000; // 2秒 (ミリ秒)
+
+             // console.log(`[Debug] Elapsed near pin time: ${elapsedTime.toFixed(0)}ms`);
+
+            if (elapsedTime >= requiredTime) {
+                console.log(`[Clear Check] Clear condition met: Near pin for >= ${requiredTime}ms!`);
+                G.isGameCleared = true;
+                G.nearPinStartTime = null; // タイマーリセット
+
+                // クリア画面へ遷移
+                setTimeout(() => {
+                    if(G.currentScene === 'game' && G.isGameCleared) {
+                       console.log("Changing scene to 'clear'.");
+                       G.changeScene('clear');
+                    }
+                }, 300); // 少し遅延
+            }
+        }
+    } else {
+        // ピンの近くにいない場合はタイマーリセット
+        if (G.nearPinStartTime !== null) {
+            console.log("[Clear Check] Letter G left near pin zone. Resetting timer.");
+            G.nearPinStartTime = null;
+        }
+    }
+};
+// ★★★ ハンドラ定義ここまで ★★★
+
     // --- Game Start/Stop Logic ---
     G.startGame = function() {
         if (G.gameIsRunning) {
@@ -72,6 +183,10 @@ window.GThrower = window.GThrower || {};
             return;
         }
         console.log("Starting game sequence...");
+        G.isGameCleared = false; // フラグリセット
+        G.pinBodies = []; // ★★★ ピン配列初期化 ★★★
+        G.nearPinStartTime = null; // ★★★ タイマー初期化 ★★★
+
         try {
             console.log("Setting up Engine, Renderer, Walls, Mouse...");
             G.setupEngine();
@@ -84,16 +199,33 @@ window.GThrower = window.GThrower || {};
             console.log("Matter environment setup complete.");
 
             console.log("Adding obstacles and letters...");
-            // G.addDefaultTree();
-            G.addPinObstacles(6); // デフォルト設定でピンを追加 (数は12個)
-            G.initializeLetters('G', config.NUM_INITIAL_LETTERS); // 文字は'G'のまま
-            G.setupSwipeMotion();
-            console.log("Objects added and motion setup complete.");
+            if (G.engine) {
+                // Collision リスナー削除 (不要)
+                Events.off(G.engine, 'collisionStart');
+                Events.off(G.engine, 'collisionActive');
+                Events.off(G.engine, 'collisionEnd');
+                // afterUpdate リスナー登録/更新
+                Events.off(G.engine, 'afterUpdate', G.handleAfterUpdate); // 既存削除(念のため)
+                Events.on(G.engine, 'afterUpdate', G.handleAfterUpdate);
+                console.log("afterUpdate listener added for clear check.");
+           } else {
+                console.error("Cannot add afterUpdate listener because G.engine is not defined!");
+           }
+           console.log("Adding obstacles and letters...");
+           // ↓↓↓ addPinObstacles の戻り値を受け取る ↓↓↓
+           const createdPins = G.addPinObstacles(6); // ピンの数は6個
+           if (createdPins && createdPins.length > 0) {
+                G.pinBodies = createdPins; // ★★★ ピンの参照を保持 ★★★
+                console.log(`Stored references to ${G.pinBodies.length} pins.`);
+           } else {
+                console.warn("No pin bodies returned from addPinObstacles.");
+           }
+           // ↑↑↑ 変更ここまで ↑↑↑
+           G.initializeLetters('G', config.NUM_INITIAL_LETTERS);
+           G.setupSwipeMotion();
+           console.log("Objects added and motion setup complete.");
 
-        } catch (error) {
-            console.error("Error during Matter.js setup:", error);
-            return;
-        }
+       } catch (error) { console.error("Error during Matter.js setup:", error); return; }
 
         if (!G.engine) {
              console.error('Engine failed to initialize before starting Runner.');
@@ -152,13 +284,11 @@ window.GThrower = window.GThrower || {};
 
         // Render停止とリスナー削除
         try {
-            if (G.render) {
-                // Renderに紐づくリスナーを削除
-                Events.off(G.render, 'afterRender', G.drawInteractionCircle); // drawInteractionCircle を参照
-                Render.stop(G.render);
-                if (G.render.context) G.render.context.clearRect(0, 0, G.render.canvas.width, G.render.canvas.height);
+            if (G.engine) {
+                Events.off(G.engine, 'afterUpdate', G.handleAfterUpdate); // afterUpdate を解除
+                console.log("afterUpdate listener removed.");
             }
-        } catch (e) { console.error("Error stopping Render:", e); } finally { G.render = null; }
+       } catch (e) { console.error("Error removing collision listeners:", e); }
 
         // タイマー停止
         if (G.gameCleanupIntervalId) clearInterval(G.gameCleanupIntervalId); G.gameCleanupIntervalId = null;
@@ -178,7 +308,16 @@ window.GThrower = window.GThrower || {};
         } catch (e) {
              console.error("Error removing mouse/engine listeners:", e);
         }
-        // --- ★★★ 追加ここまで ★★★
+        try {
+            if (G.engine) {
+                 Events.off(G.engine, 'sleepStart', G.handleSleepStart);
+                 console.log("sleepStart listener removed.");
+            }
+       } catch (e) { console.error("Error removing sleepStart listener:", e); }
+
+       G.pinBodies = []; // ピンの参照をクリア
+       G.nearPinStartTime = null; // タイマーをリセット
+       console.log("Pin references and near timer reset.");
 
         // ワールドの内容をクリアし、エンジンをクリア
         try {
@@ -298,7 +437,7 @@ window.GThrower = window.GThrower || {};
             console.log("Setting up keyboard listener for 'R' key...");
             window.addEventListener('keydown', function(event) {
                 // 'R' または 'r' キーが押された場合 かつ ゲーム画面が表示中の場合
-                if (G.currentScene === 'game' && event.key.toLowerCase() === 'r') {
+                if (G.currentScene === 'game' && event.key.toLowerCase() === 'g') {
                     // 他の修飾キー（Shift, Ctrl, Alt）が押されていないことも確認（オプション）
                     if (!event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
                         console.log("Detected 'R' key press in game scene.");

@@ -47,6 +47,14 @@ window.GThrower = window.GThrower || {};
     // --- Wall Creation ---
     G.createWalls = function() {
         if (!G.world) { console.error('World not setup.'); return; }
+        const wallOptions = { isStatic: true };
+        const groundOptions = {
+            isStatic: true,
+            friction: 0.8,
+            frictionStatic: 1.2,
+            restitution: 0.05,
+            label: 'ground' // ★★★ このラベルが必要 ★★★
+        };
         const walls = [
             Bodies.rectangle(config.CANVAS_WIDTH / 2, -config.WALL_THICKNESS / 2, config.CANVAS_WIDTH, config.WALL_THICKNESS, { isStatic: true }),
             Bodies.rectangle(config.CANVAS_WIDTH / 2, config.CANVAS_HEIGHT + config.WALL_THICKNESS / 2, config.CANVAS_WIDTH, config.WALL_THICKNESS, { isStatic: true }),
