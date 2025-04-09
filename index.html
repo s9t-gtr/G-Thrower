@@ -73,46 +73,106 @@
             cursor: pointer;
         }
 
-        /* ステージセレクト画面スタイル */
+        /* ステージセレクト画面タイトル */
         #stage-select-screen h2 {
-            margin-bottom: 40px;
-            font-size: 2.8em;    /* 例: 2em から 2.8em へ */
-            margin-bottom: 50px; /* 例: 40px から 50px へ */
+            font-size: 2.8em;
+            margin-bottom: 60px; /* ボタンが立体的になったので間隔を調整 */
         }
+        /* ボタンコンテナ */
         .stage-buttons {
-            display: flex;          /* ボタンを横に並べる */
-            flex-wrap: wrap;        /* コンテナ幅で折り返す */
-            justify-content: center;/* ボタン群を中央揃え */
-            gap: 20px;              /* 例: 15px から 20px へ */
-            max-width: 680px;       /* 例: (ボタン幅120px * 5) + (隙間20px * 4) = 680px */
-
-            margin-left: auto;      /* コンテナ自体を親要素内で中央揃え */
-            margin-right: auto;     /* コンテナ自体を親要素内で中央揃え */
-        }
-        /* ボタン共通のスタイル調整 */
-        .stage-buttons button {
-            width: 120px;           /* 例: 80px から 120px へ */
-            height: 120px;          /* 例: 80px から 120px へ */
-            border-width: 3px;      /* 例: 境界線も少し太く */
-            /* font-size: 1.2em; */ /* 文字は見えなくなるので不要かも */
-            cursor: pointer;
-            border: 2px solid #ccc;
-            background-color: #fff; /* 画像読み込み前の背景色 */
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
-            align-items: center;
-            padding: 0;
-            position: relative; /* 疑似要素を使う場合に備えて */
-            overflow: hidden;   /* 画像がはみ出さないように */
-
-            /* ↓↓↓ 背景画像表示用の設定を追加 ↓↓↓ */
-            background-size: cover; /* または contain など、画像の表示方法に合わせて調整 */
-            background-position: center center;
-            background-repeat: no-repeat;
-            color: transparent; /* ★★★ 数字を透明にする ★★★ */
-            text-indent: -9999px; /* ★★★ アクセシビリティのため数字は残しつつ、画面外に飛ばす ★★★ */
-            /* ↑↑↑ 追加ここまで ↑↑↑ */
+/* ↓↓↓ 隙間と最大幅を大きいボタンに合わせて調整 ↓↓↓ */
+gap: 30px;              /* 例: 隙間を 25px -> 30px に */
+    max-width: 730px;       /* 例: ボタン幅120px * 5 + 隙間30px * 4 = 720px より少し余裕 */
+    /* ↑↑↑ 調整ここまで ↑↑↑ */
+            margin-left: auto;
+            margin-right: auto;
         }
+
+/* iPhone風ボタンスタイルを修正 */
+.iphone-like-button {
+    /* ↓↓↓ サイズ、ボーダー、角丸、影を調整 ↓↓↓ */
+    width: 120px;           /* 例: 70px -> 120px */
+    height: 120px;          /* 例: 70px -> 120px */
+    border-width: 5px;      /* 例: 4px -> 5px */
+    border-color: #E0E0E0 #B0B0B0 #989898 #B0B0B0;
+    border-radius: 25px;    /* 例: 15px -> 25px (サイズに合わせて調整) */
+    background-color: #E0E0E0;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    box-shadow: /* 影もボタンサイズに合わせて少し大きく */
+        0 6px 9px rgba(0, 0, 0, 0.3),
+        inset 0 4px 4px rgba(255, 255, 255, 0.7),
+        inset 0 -4px 4px rgba(0, 0, 0, 0.15),
+        inset 0 0 0 2px rgba(255, 255, 255, 0.8),
+        inset 0 0 0 3px rgba(0, 0, 0, 0.1);
+    /* ↑↑↑ 調整ここまで ↑↑↑ */
+    cursor: pointer;
+    position: relative;
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    overflow: hidden;
+}
+
+/* :active スタイルの影も調整 */
+.iphone-like-button:active {
+    transform: scale(0.96); /* スケールも微調整 */
+    box-shadow: /* 押したときの影も調整 */
+        0 3px 5px rgba(0, 0, 0, 0.2),
+        inset 0 2px 3px rgba(255, 255, 255, 0.5),
+        inset 0 -2px 3px rgba(0, 0, 0, 0.1),
+        inset 0 0 0 1.5px rgba(255, 255, 255, 0.5),
+        inset 0 0 0 2.5px rgba(0, 0, 0, 0.05);
+}
+
+/* Locked 状態スタイル (影を通常時に合わせる) */
+.iphone-like-button.locked {
+    opacity: 0.6;
+    cursor: default;
+    filter: grayscale(50%);
+    pointer-events: none;
+    transform: none !important;
+    /* 通常時の影 (調整後) を適用 */
+    box-shadow:
+        0 6px 9px rgba(0, 0, 0, 0.3),
+        inset 0 4px 4px rgba(255, 255, 255, 0.7),
+        inset 0 -4px 4px rgba(0, 0, 0, 0.15),
+        inset 0 0 0 2px rgba(255, 255, 255, 0.8),
+        inset 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+/* 数字を入れる丸い縁取りのスタイル */
+.number-circle {
+    /* ↓↓↓ ボタンサイズに合わせて調整 ↓↓↓ */
+    width: 40px;            /* 例: 28px -> 40px */
+    height: 40px;           /* 例: 28px -> 40px */
+    border-width: 3px;      /* 例: 2px -> 3px */
+    font-size: 24px;        /* 例: 18px -> 24px */
+    bottom: -20px;          /* 例: 新しい高さ(40px)の半分 */
+    /* ↑↑↑ 調整ここまで ↑↑↑ */
+    border-style: solid;
+    border-color: #E8E8E8 #B8B8B8 #A0A0A0 #B8B8B8;
+    border-radius: 50%;
+    background: linear-gradient(to bottom, #FDFDFD, #F0F0F0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: black;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    box-shadow: /* 影も少し調整 */
+        0 1.5px 2px rgba(0, 0, 0, 0.2),
+        inset 0 2px 2px rgba(255, 255, 255, 0.8),
+        inset 0 -1.5px 1.5px rgba(0, 0, 0, 0.15),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    filter: none;
+}
+
 
         
         /* ↓↓↓ 各ステージボタンの背景画像を指定 (ファイル名が 1.png, 2.png ... の場合) ↓↓↓ */
@@ -128,21 +188,23 @@
         .stage-buttons button[data-stage-id="10"] { background-image: url('assets/images/icons/10_sphinx.png'); }
         /* ↑↑↑ 追加ここまで ↑↑↑ */
 
-        /* タイトルへ戻るボタン (インラインスタイルを削除推奨) */
-        #back-to-title-button {
-            /* ↓↓↓ フォントサイズ、パディング、マージンを調整 ↓↓↓ */
-            font-size: 1.3em;       /* 例: 1.1em から 1.3em へ */
-            padding: 12px 25px;     /* 例: 10px 20px から調整 */
-            margin-top: 40px;       /* 例: 30px から 40px へ */
-            /* ↑↑↑ 変更ここまで ↑↑↑ */
-            cursor: pointer;
-            /* 必要なら他のスタイルも追加 */
-            background-color: rgba(0, 0, 0, 0.4); /* 例: タイトル画面と合わせる */
-            color: white;
-            border: 2px solid white;
-        }
+/* タイトルへ戻るボタン */
+#back-to-title-button {
+    /* ↓↓↓ 上のボタン群との間隔を調整 ↓↓↓ */
+    margin-top: 60px;       /* 例: ボタンと数字サークルが大きくなった分、間隔を広げる */
+    /* ↑↑↑ 調整ここまで ↑↑↑ */
+    font-size: 1.2em; /* 他の要素とのバランスを見て調整 */
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: rgba(100, 100, 100, 0.6);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    transition: background-color 0.1s ease;
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+}
         #back-to-title-button:hover {
-            background-color: rgba(0, 0, 0, 0.6);
+            background-color: rgba(80, 80, 80, 0.7);
         }
 
         .stage-buttons button.locked {
@@ -237,19 +299,39 @@
     <div id="stage-select-screen" class="screen">
         <h2>ステージセレクト</h2>
         <div class="stage-buttons">
-            <button id="stage-1-button" data-stage-id="1">1</button>
-            <button class="locked" data-stage-id="2">2</button>
-            <button class="locked" data-stage-id="3">3</button>
-            <button class="locked" data-stage-id="4">4</button>
-            <button class="locked" data-stage-id="5">5</button>
-            <button class="locked" data-stage-id="6">6</button>
-            <button class="locked" data-stage-id="7">7</button>
-            <button class="locked" data-stage-id="8">8</button>
-            <button class="locked" data-stage-id="9">9</button>
-            <button class="locked" data-stage-id="10">10</button>
+            <button id="stage-1-button" data-stage-id="1" class="iphone-like-button">
+                <span class="number-circle">1</span>
+            </button>
+            <button class="locked iphone-like-button" data-stage-id="2">
+                <span class="number-circle">2</span>
+            </button>
+            <button class="locked iphone-like-button" data-stage-id="3">
+                <span class="number-circle">3</span>
+            </button>
+            <button class="locked iphone-like-button" data-stage-id="4">
+                <span class="number-circle">4</span>
+            </button>
+            <button class="locked iphone-like-button" data-stage-id="5">
+                <span class="number-circle">5</span>
+            </button>
+            <button class="locked iphone-like-button" data-stage-id="6">
+                <span class="number-circle">6</span>
+            </button>
+            <button class="locked iphone-like-button" data-stage-id="7">
+                <span class="number-circle">7</span>
+            </button>
+            <button class="locked iphone-like-button" data-stage-id="8">
+                <span class="number-circle">8</span>
+            </button>
+            <button class="locked iphone-like-button" data-stage-id="9">
+                <span class="number-circle">9</span>
+            </button>
+            <button class="locked iphone-like-button" data-stage-id="10">
+                <span class="number-circle">10</span>
+            </button>
             </div>
-            <button id="back-to-title-button">タイトルへ戻る</button>
-        </div>
+        <button id="back-to-title-button">タイトルへ戻る</button>
+    </div>
     </div>
 
     <div id="game-container">
