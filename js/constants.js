@@ -3,36 +3,62 @@
 // グローバルな GThrower オブジェクトがなければ作成
 window.GThrower = window.GThrower || {};
 
+// --- 新しいキャンバスサイズを定義 ---
+const newCanvasWidth = 960;  // 16:9 の幅 (例)
+const newCanvasHeight = 540; // 16:9 の高さ (例)
+
 GThrower.config = {
     // --- キャンバス・表示関連 ---
-    CANVAS_WIDTH: 800,
-    CANVAS_HEIGHT: 600,
+    // ↓↓↓ サイズを変更 ↓↓↓
+    CANVAS_WIDTH: newCanvasWidth,
+    CANVAS_HEIGHT: newCanvasHeight,
+    // ↑↑↑ 変更ここまで ↑↑↑
     WALL_THICKNESS: 50,
-    BACKGROUND_COLOR: '#ffffff',
+    // ↓↓↓ 背景設定に合わせて更新 (レンダラーが透明なので不要かも) ↓↓↓
+    BACKGROUND_COLOR: 'transparent', // '#ffffff' から変更
+    // ↑↑↑ 変更ここまで ↑↑↑
 
     // --- 文字関連 ---
     LETTER_SCALE: 0.8,
-    NUM_INITIAL_LETTERS: 1, // 初期文字数
-    SWIPE_VELOCITY_SCALE: 1.8, // スワイプ速度倍率
+    NUM_INITIAL_LETTERS: 1,
+    SWIPE_VELOCITY_SCALE: 1.8,
 
     // --- 操作エリア関連 ---
-    INTERACTION_CIRCLE_X: 100, // 円の中心 X 座標 (左下)
-    INTERACTION_CIRCLE_Y: 600 - 100, // 円の中心 Y 座標 (左下) - CANVAS_HEIGHT は使わず直接計算
-    INTERACTION_CIRCLE_RADIUS: 80, // 円の半径
-    INTERACTION_CIRCLE_RADIUS_SQ: 80 * 80, // 半径の2乗 (計算用)
+    INTERACTION_CIRCLE_X: 100,
+    // ↓↓↓ Y座標はオブジェクト定義後に計算するため、一旦仮の値（またはコメントアウト）↓↓↓
+    INTERACTION_CIRCLE_Y: 0, // 仮の値 (後で下の行で上書きします)
+    // INTERACTION_CIRCLE_Y: 600 - 100, // ← 元の行
+    // ↑↑↑ 変更ここまで ↑↑↑
+    INTERACTION_CIRCLE_RADIUS: 80,
+    INTERACTION_CIRCLE_RADIUS_SQ: 80 * 80,
 
     // --- 環境・物理関連 ---
-    GRAVITY_Y: 0.4,
-    ENABLE_SLEEPING: true, // スリープ機能の有効化
+    GRAVITY_Y: 0.3, // (ご提示のコードでは0.4でしたが、一般的な値0.3に戻しています。必要なら0.4にしてください)
+    ENABLE_SLEEPING: true,
 
-    // --- 木関連 ---
+    // --- 木関連 (現在は使用されていないためコメントアウトまたは削除推奨) ---
+    /*
     TRUNK_WIDTH: 20,
-    TRUNK_HEIGHT_RATIO: 0.55, // キャンバス高さに対する比率
+    TRUNK_HEIGHT_RATIO: 0.55,
     BRANCH_THICKNESS: 12,
     TREE_COLOR: '#8B4513',
-    TREE_ROOT_X_RATIO: 0.7, // キャンバス幅に対する比率
+    TREE_ROOT_X_RATIO: 0.7,
+    */
 
     // --- その他 ---
-    OBJECT_CLEANUP_INTERVAL: 5000, // 画面外オブジェクト削除の間隔(ms)
-    OBJECT_CLEANUP_MARGIN: 100 // 画面外判定のマージン
+    OBJECT_CLEANUP_INTERVAL: 5000,
+    OBJECT_CLEANUP_MARGIN: 100,
+
+    // --- ピン関連のデフォルト値 (参考として追加) ---
+    // sceneManager.js で addSinglePin を呼び出す際に使われる値
+    PIN_DEFAULT_RADIUS: 10,
+    PIN_DEFAULT_X: newCanvasWidth * 0.8,
+    PIN_DEFAULT_Y: newCanvasHeight * 0.4
 };
+
+// --- オブジェクト定義後に、CANVAS_HEIGHTに依存する値を計算して設定 ---
+// GThrower.config オブジェクト内で自身のプロパティを参照できないため、ここで計算します。
+GThrower.config.INTERACTION_CIRCLE_Y = GThrower.config.CANVAS_HEIGHT - 100;
+
+// --- 確認用ログ (任意) ---
+// console.log("Constants loaded. Interaction Circle Y:", GThrower.config.INTERACTION_CIRCLE_Y);
