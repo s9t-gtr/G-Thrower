@@ -144,7 +144,7 @@ G.handleAfterUpdate = function(event) {
             // ピンの近くにいる状態が継続している場合
             const currentTime = G.engine.timing.timestamp;
             const elapsedTime = currentTime - G.nearPinStartTime;
-            const requiredTime = 2000; // 2秒 (ミリ秒)
+            const requiredTime = 3000; // 3秒 (ミリ秒)
 
              // console.log(`[Debug] Elapsed near pin time: ${elapsedTime.toFixed(0)}ms`);
 
@@ -421,11 +421,6 @@ G.handleAfterUpdate = function(event) {
                 backToTitleButton.addEventListener('click', () => G.changeScene('title')); // クリックでタイトル画面へ
             } else { console.error("Back to title button (id: back-to-title-button) not found"); }
 
-            // Game Screen (仮のクリアボタン)
-            const clearTriggerButton = document.getElementById('clear-trigger-button');
-            if (clearTriggerButton) {
-                clearTriggerButton.addEventListener('click', () => G.changeScene('clear')); // 遷移先は 'clear'
-            } else { console.error("Clear trigger button (id: clear-trigger-button) not found"); }
 
             // Clear Screen
             const backToSelectButton = document.getElementById('back-to-select-button');
