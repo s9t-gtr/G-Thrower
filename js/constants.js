@@ -33,7 +33,7 @@ GThrower.config = {
     INTERACTION_CIRCLE_RADIUS_SQ: 80 * 80,
 
     // --- 環境・物理関連 ---
-    GRAVITY_Y: 0.6, // 例: 0.3 から 0.6 に変更 (値を大きくすると重力が強くなる)
+    GRAVITY_Y: 0.5, // 例: 0.3 から 0.6 に変更 (値を大きくすると重力が強くなる)
     ENABLE_SLEEPING: true,
 
     // --- 木関連 (現在は使用されていないためコメントアウトまたは削除推奨) ---
