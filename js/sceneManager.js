@@ -229,8 +229,8 @@ G.handleAfterUpdate = function(event) {
            }
            console.log("Adding obstacles and letters...");
             // 配置したい座標と半径を指定 (例: 画面右側の中央やや上)
-            const pinX = config.CANVAS_WIDTH * 0.8;
-            const pinY = config.CANVAS_HEIGHT * 0.4;
+            const pinX = config.CANVAS_WIDTH * 0.3;
+            const pinY = config.CANVAS_HEIGHT * 0.8;
             const pinRadius = 4; // 半径を少し大きくする例
 
             // 新しい関数を呼び出し、戻り値を受け取る

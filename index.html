@@ -76,30 +76,75 @@
         /* ステージセレクト画面スタイル */
         #stage-select-screen h2 {
             margin-bottom: 40px;
+            font-size: 2.8em;    /* 例: 2em から 2.8em へ */
+            margin-bottom: 50px; /* 例: 40px から 50px へ */
         }
         .stage-buttons {
             display: flex;          /* ボタンを横に並べる */
             flex-wrap: wrap;        /* コンテナ幅で折り返す */
             justify-content: center;/* ボタン群を中央揃え */
-            gap: 15px;              /* ボタン間の隙間 (既存の値) */
-
-            /* ↓↓↓ コンテナの最大幅を設定し、5個で折り返すようにする ↓↓↓ */
-            /* ボタン幅(80px) * 5 + 隙間(15px) * 4 = 400 + 60 = 460px */
-            /* 少し余裕を持たせて 470px 程度にする */
-            max-width: 470px;
-            /* ↑↑↑ この行を追加または修正 ↑↑↑ */
+            gap: 20px;              /* 例: 15px から 20px へ */
+            max-width: 680px;       /* 例: (ボタン幅120px * 5) + (隙間20px * 4) = 680px */
 
             margin-left: auto;      /* コンテナ自体を親要素内で中央揃え */
             margin-right: auto;     /* コンテナ自体を親要素内で中央揃え */
         }
+        /* ボタン共通のスタイル調整 */
         .stage-buttons button {
-            width: 80px;
-            height: 80px;
-            font-size: 1.2em;
+            width: 120px;           /* 例: 80px から 120px へ */
+            height: 120px;          /* 例: 80px から 120px へ */
+            border-width: 3px;      /* 例: 境界線も少し太く */
+            /* font-size: 1.2em; */ /* 文字は見えなくなるので不要かも */
             cursor: pointer;
             border: 2px solid #ccc;
-            background-color: #fff;
+            background-color: #fff; /* 画像読み込み前の背景色 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            position: relative; /* 疑似要素を使う場合に備えて */
+            overflow: hidden;   /* 画像がはみ出さないように */
+
+            /* ↓↓↓ 背景画像表示用の設定を追加 ↓↓↓ */
+            background-size: cover; /* または contain など、画像の表示方法に合わせて調整 */
+            background-position: center center;
+            background-repeat: no-repeat;
+            color: transparent; /* ★★★ 数字を透明にする ★★★ */
+            text-indent: -9999px; /* ★★★ アクセシビリティのため数字は残しつつ、画面外に飛ばす ★★★ */
+            /* ↑↑↑ 追加ここまで ↑↑↑ */
         }
+
+        
+        /* ↓↓↓ 各ステージボタンの背景画像を指定 (ファイル名が 1.png, 2.png ... の場合) ↓↓↓ */
+        .stage-buttons button[data-stage-id="1"] { background-image: url('assets/images/icons/1_kiyomizu_temple.png'); }
+        .stage-buttons button[data-stage-id="2"] { background-image: url('assets/images/icons/2_shachihoko.png'); }
+        .stage-buttons button[data-stage-id="3"] { background-image: url('assets/images/icons/3_tokyo_tower.png'); }
+        .stage-buttons button[data-stage-id="4"] { background-image: url('assets/images/icons/4_Five-storied_pagoda.png'); }
+        .stage-buttons button[data-stage-id="5"] { background-image: url('assets/images/icons/5_statue_of_liberty.png'); }
+        .stage-buttons button[data-stage-id="6"] { background-image: url('assets/images/icons/6_eiffel_tower.png'); }
+        .stage-buttons button[data-stage-id="7"] { background-image: url('assets/images/icons/7_colosseum.png'); }
+        .stage-buttons button[data-stage-id="8"] { background-image: url('assets/images/icons/8_moai.png'); }
+        .stage-buttons button[data-stage-id="9"] { background-image: url('assets/images/icons/9_mont_saint-michel.png'); }
+        .stage-buttons button[data-stage-id="10"] { background-image: url('assets/images/icons/10_sphinx.png'); }
+        /* ↑↑↑ 追加ここまで ↑↑↑ */
+
+        /* タイトルへ戻るボタン (インラインスタイルを削除推奨) */
+        #back-to-title-button {
+            /* ↓↓↓ フォントサイズ、パディング、マージンを調整 ↓↓↓ */
+            font-size: 1.3em;       /* 例: 1.1em から 1.3em へ */
+            padding: 12px 25px;     /* 例: 10px 20px から調整 */
+            margin-top: 40px;       /* 例: 30px から 40px へ */
+            /* ↑↑↑ 変更ここまで ↑↑↑ */
+            cursor: pointer;
+            /* 必要なら他のスタイルも追加 */
+            background-color: rgba(0, 0, 0, 0.4); /* 例: タイトル画面と合わせる */
+            color: white;
+            border: 2px solid white;
+        }
+        #back-to-title-button:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+
         .stage-buttons button.locked {
             background-color: #eee;
             color: #aaa;
@@ -193,17 +238,17 @@
         <h2>ステージセレクト</h2>
         <div class="stage-buttons">
             <button id="stage-1-button" data-stage-id="1">1</button>
-            <button class="locked">2</button>
-            <button class="locked">3</button>
-            <button class="locked">4</button>
-            <button class="locked">5</button>
-            <button class="locked">6</button>
-            <button class="locked">7</button>
-            <button class="locked">8</button>
-            <button class="locked">9</button>
-            <button class="locked">10</button>
-        </div>
-        <button id="back-to-title-button" style="margin-top: 30px; padding: 10px 20px; font-size: 1.1em; cursor: pointer;">タイトルへ戻る</button>
+            <button class="locked" data-stage-id="2">2</button>
+            <button class="locked" data-stage-id="3">3</button>
+            <button class="locked" data-stage-id="4">4</button>
+            <button class="locked" data-stage-id="5">5</button>
+            <button class="locked" data-stage-id="6">6</button>
+            <button class="locked" data-stage-id="7">7</button>
+            <button class="locked" data-stage-id="8">8</button>
+            <button class="locked" data-stage-id="9">9</button>
+            <button class="locked" data-stage-id="10">10</button>
+            </div>
+            <button id="back-to-title-button">タイトルへ戻る</button>
         </div>
     </div>
 
