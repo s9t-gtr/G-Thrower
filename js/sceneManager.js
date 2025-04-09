@@ -62,7 +62,6 @@ window.GThrower = window.GThrower || {};
     };
 
     // --- Game Start/Stop Logic ---
-    // --- Game Start/Stop Logic ---
     G.startGame = function() {
         if (G.gameIsRunning) {
             console.warn("startGame called but game is already running.");
@@ -143,37 +142,43 @@ window.GThrower = window.GThrower || {};
 
     G.stopGame = function() {
         if (!G.gameIsRunning) {
-            // console.log("stopGame called but game is not running."); // 頻繁に出る可能性があるのでコメントアウト
             return;
         }
         console.log("Stopping game sequence...");
+        G.gameIsRunning = false;
 
-        // RunnerとRenderを停止
+        // Runner停止
+        try { if (G.runner) Runner.stop(G.runner); } catch (e) { console.error("Error stopping Runner:", e); } finally { G.runner = null; }
+
+        // Render停止とリスナー削除
         try {
-            if (G.runner) {
-                Runner.stop(G.runner);
-                console.log("Runner stopped.");
-                G.runner = null;
-            }
             if (G.render) {
-                Events.off(G.render, 'afterRender', G.drawInteractionCircle);
+                // Renderに紐づくリスナーを削除
+                Events.off(G.render, 'afterRender', G.drawInteractionCircle); // drawInteractionCircle を参照
                 Render.stop(G.render);
-                console.log("Render stopped.");
-                if (G.render.context) {
-                     G.render.context.clearRect(0, 0, G.render.canvas.width, G.render.canvas.height);
-                }
-                G.render = null;
+                if (G.render.context) G.render.context.clearRect(0, 0, G.render.canvas.width, G.render.canvas.height);
             }
-        } catch (error) {
-            console.error("Error stopping Runner or Render:", error);
-        }
+        } catch (e) { console.error("Error stopping Render:", e); } finally { G.render = null; }
 
-        // 画面外オブジェクト削除のタイマーを停止
-        if (G.gameCleanupIntervalId) {
-            clearInterval(G.gameCleanupIntervalId);
-            G.gameCleanupIntervalId = null;
-            console.log("Cleanup interval timer stopped.");
+        // タイマー停止
+        if (G.gameCleanupIntervalId) clearInterval(G.gameCleanupIntervalId); G.gameCleanupIntervalId = null;
+
+        // --- ★★★ マウス操作関連のリスナー削除を追加 ★★★ ---
+        try {
+             // mouseConstraint に紐づく mousedown リスナーを削除
+             if (G.mouseConstraint && typeof G.handleMouseDown === 'function') { // G.handleMouseDown が存在するか確認
+                  Events.off(G.mouseConstraint, 'mousedown', G.handleMouseDown); // 定義した関数を指定
+                  console.log("Mousedown listener removed.");
+             }
+             // engine に紐づく beforeUpdate リスナーを削除
+             if (G.engine && typeof G.handleBeforeUpdate === 'function') { // G.handleBeforeUpdate が存在するか確認
+                  Events.off(G.engine, 'beforeUpdate', G.handleBeforeUpdate); // 定義した関数を指定
+                  console.log("BeforeUpdate listener removed.");
+             }
+        } catch (e) {
+             console.error("Error removing mouse/engine listeners:", e);
         }
+        // --- ★★★ 追加ここまで ★★★
 
         // ワールドの内容をクリアし、エンジンをクリア
         try {

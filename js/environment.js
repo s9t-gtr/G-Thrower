@@ -56,48 +56,78 @@ window.GThrower = window.GThrower || {};
         Composite.add(G.world, walls);
     };
 
-    // --- Mouse Interaction Setup ---
-    G.setupMouseInteraction = function() {
-        if (!G.engine || !G.render || !G.world) { console.error('Engine, Render or World not setup.'); return; }
-        G.mouse = Mouse.create(G.render.canvas); // GThrowerオブジェクトにmouseを格納
-        G.mouseConstraint = MouseConstraint.create(G.engine, { // GThrowerオブジェクトにmouseConstraintを格納
-            mouse: G.mouse,
-            constraint: {
-                stiffness: 0.2,
-                render: { visible: false }
-            }
-        });
-        Composite.add(G.world, G.mouseConstraint);
-        G.render.mouse = G.mouse;
+    // --- ★★★ マウスダウン時の処理関数 ★★★ ---
+    G.handleMouseDown = (event) => {
+        // G.mouseConstraint が存在しないか、イベント情報がなければ何もしない
+        if (!G.mouseConstraint || !event || !event.mouse || !event.mouse.position) return;
+        const mousePosition = event.mouse.position;
+        const dx = mousePosition.x - config.INTERACTION_CIRCLE_X;
+        const dy = mousePosition.y - config.INTERACTION_CIRCLE_Y;
+        const distanceSquared = dx * dx + dy * dy;
 
-        // マウスダウン時のエリアチェック
-        Events.on(G.mouseConstraint, 'mousedown', (event) => {
-            const mousePosition = event.mouse.position;
+        if (distanceSquared > config.INTERACTION_CIRCLE_RADIUS_SQ) {
+            // console.log("Mousedown outside circle - preventing grab.");
+            G.mouseConstraint.body = null; // 円の外なら掴ませない
+        }
+    };
+
+    // --- ★★★ ドラッグ中の処理関数 ★★★ ---
+    G.handleBeforeUpdate = (event) => {
+        // mouseConstraintと掴んでいるbodyが存在するか確認
+        if (G.mouseConstraint && G.mouseConstraint.body && G.mouseConstraint.mouse) {
+            const mousePosition = G.mouseConstraint.mouse.position;
+            if (!mousePosition) return;
             const dx = mousePosition.x - config.INTERACTION_CIRCLE_X;
             const dy = mousePosition.y - config.INTERACTION_CIRCLE_Y;
             const distanceSquared = dx * dx + dy * dy;
 
             if (distanceSquared > config.INTERACTION_CIRCLE_RADIUS_SQ) {
-                G.mouseConstraint.body = null; // 円の外なら掴ませない
-            }
-        });
-
-        // ドラッグ中に円の外に出たら離す
-        Events.on(G.engine, 'beforeUpdate', (event) => {
-            if (G.mouseConstraint.body) {
-                const mousePosition = G.mouseConstraint.mouse.position;
-                const dx = mousePosition.x - config.INTERACTION_CIRCLE_X;
-                const dy = mousePosition.y - config.INTERACTION_CIRCLE_Y;
-                const distanceSquared = dx * dx + dy * dy;
-
-                if (distanceSquared > config.INTERACTION_CIRCLE_RADIUS_SQ) {
-                    G.mouseConstraint.body = null;
-                    if (G.mouseConstraint.constraint) {
-                       G.mouseConstraint.constraint.bodyB = null;
-                    }
+                // console.log("Mouse left interaction circle while dragging, releasing object.");
+                G.mouseConstraint.body = null;
+                if (G.mouseConstraint.constraint) {
+                   G.mouseConstraint.constraint.bodyB = null;
                 }
             }
-        });
+        }
+    };
+
+    // --- Mouse Interaction Setup ---
+    G.setupMouseInteraction = function() {
+        if (!G.engine || !G.render || !G.world) { console.error('Engine, Render or World not setup for mouse interaction.'); return; }
+
+        // マウスオブジェクト作成 (なければ)
+        if (!G.mouse) {
+            G.mouse = Mouse.create(G.render.canvas);
+        }
+        // マウス制約オブジェクト作成 (なければ)
+        if (!G.mouseConstraint) {
+            G.mouseConstraint = MouseConstraint.create(G.engine, {
+                mouse: G.mouse,
+                constraint: { stiffness: 0.2, render: { visible: false } }
+            });
+            Composite.add(G.world, G.mouseConstraint); // ワールドへの追加は初回のみ
+            console.log("MouseConstraint created and added to world.");
+        } else {
+             console.log("MouseConstraint already exists.");
+             // 既存の制約に対してマウスを再設定 (必要なら)
+             G.mouseConstraint.mouse = G.mouse;
+        }
+
+        // レンダラーにマウスを関連付け (毎回行うのが安全)
+        if(G.render) G.render.mouse = G.mouse;
+
+        // --- ★★★ イベントリスナー設定 (Events.on のみ) ★★★ ---
+        // stopGameでoffするので、ここでは既存のoffは不要
+        if (G.mouseConstraint) {
+             console.log("Adding mouse interaction listeners ('mousedown' and 'beforeUpdate')...");
+             // 既存のリスナーを削除してから追加する方がより安全な場合もあるが、
+             // stopGameで確実に削除する前提で、ここではonのみ行う
+             Events.on(G.mouseConstraint, 'mousedown', G.handleMouseDown); // 定義した関数を使用
+             Events.on(G.engine, 'beforeUpdate', G.handleBeforeUpdate);    // 定義した関数を使用
+             console.log("Mouse interaction listeners added.");
+        } else {
+             console.error("Cannot add mouse listeners because G.mouseConstraint is not defined.");
+        }
     };
 
 })(window.GThrower, window.Matter); // IIFEを実行し、グローバルオブジェクトを渡す
