@@ -18,6 +18,7 @@ window.GThrower = window.GThrower || {};
 
        // --- ★★★ 文字 'G' の作成関数 (色を白に変更 - 修正版) ★★★ ---
        letterCreators['G'] = function(x, y) {
+        const collisionGroup = Body.nextGroup(true);
         const scale = config.LETTER_SCALE;
         const radius = 38 * scale;
         const partThickness = 8 * scale;
@@ -28,8 +29,15 @@ window.GThrower = window.GThrower || {};
             lineWidth: 1
         };
         // ↑↑↑ 定義ここまで ↑↑↑
-        const partOptions = {}; // 物理特性など、render以外の共通オプション用 (現在空)
-
+        const partOptions = {
+            // friction: 0.6,
+            // frictionStatic: 1.0,
+            restitution: 0.00,  // ★★★ ここです: 反発係数 (挙動改善のためには 0 推奨)
+            density: 1,
+            render: partRenderOptions,
+            collisionFilter: { group: collisionGroup }
+            // slop: 0.05
+       };
         const parts = [];
 
         // --- 円弧部分の生成 (18 セグメント) ---
@@ -78,9 +86,9 @@ window.GThrower = window.GThrower || {};
         const letterG = Body.create({
             parts: parts,
             frictionAir: 0.035,
-            friction: 0.6,
-            frictionStatic: 1.0,
-            restitution: 0.05,
+            friction: 0.0, //<--- 大事
+            frictionStatic: 0,
+            restitution: 0.00,
             isSleeping: true,
             density: 0.0009,
             // ★★★ 複合ボディ全体に render オプションを設定 (白色) ★★★

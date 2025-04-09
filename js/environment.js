@@ -101,9 +101,9 @@ window.GThrower = window.GThrower || {};
         const wallOptions = { isStatic: true };
         const groundOptions = {
             isStatic: true,
-            friction: 0.8,
-            frictionStatic: 1.2,
-            restitution: 0.05,
+            friction: 0.0,
+            frictionStatic: 0,
+            restitution: 0.00,
             label: 'ground' // ★★★ このラベルが必要 ★★★
         };
         const walls = [
