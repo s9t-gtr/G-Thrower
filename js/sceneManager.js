@@ -14,6 +14,23 @@ window.GThrower = window.GThrower || {};
     const config = G.config;
     const { Engine, Render, Runner, Events, Composite, Body } = Matter;
 
+        // --- ★★★ ステージごとのピン座標データ ★★★ ---
+    // 配列のインデックスが (ステージ番号 - 1) に対応
+    const stagePinData = [
+        /* Stage 1 (Index 0) */ { x: 633, y: 442 },
+        /* Stage 2 (Index 1) */ { x: 862, y: 38 },
+        /* Stage 3 (Index 2) */ { x: 905, y: 55 },
+        /* Stage 4 (Index 3) */ { x: 915, y: 66 },
+        /* Stage 5 (Index 4) */ { x: 766, y: 107 },
+        /* Stage 6 (Index 5) */ { x: 919, y: 35 },
+        /* Stage 7 (Index 6) */ { x: 871, y: 103 },
+        /* Stage 8 (Index 7) */ { x: 928, y: 447 },
+        /* Stage 9 (Index 8) */ { x: 852, y: 76 },
+        /* Stage 10 (Index 9)*/ { x: 907, y: 109 }
+      ];
+      // ★★★ データ定義ここまで ★★★
+  
+
     // --- Scene Management & Game State ---
     G.scenes = {};
     G.currentScene = null;
@@ -83,7 +100,7 @@ G.handleAfterUpdate = function(event) {
 
     let isNearAnyPin = false;
     const letterRadius = (38 * config.LETTER_SCALE); // 文字のおおよその半径
-    const pinRadius = 7; // obstacle.js で定義したピンの半径 (本当は config にあるべき)
+    const pinRadius = 6; // obstacle.js で定義したピンの半径 (本当は config にあるべき)
     const proximityMargin = 10; // 「近く」と判定する追加のマージン (ピクセル)
     const distanceThreshold = letterRadius + pinRadius + proximityMargin;
     const distanceThresholdSq = distanceThreshold * distanceThreshold; // 比較用の2乗値
@@ -230,23 +247,35 @@ G.handleAfterUpdate = function(event) {
                 console.error("Cannot add afterUpdate listener because G.engine is not defined!");
            }
            console.log("Adding obstacles and letters...");
-            // 配置したい座標と半径を指定 (例: 画面右側の中央やや上)
-            const pinX = 629; // ★★★ 指定された X 座標 ★★★
-            const pinY = 437; // ★★★ 指定された Y 座標 ★★★
-            const pinRadius = 6; // 半径を少し大きくする例
 
-            // 新しい関数を呼び出し、戻り値を受け取る
-            const createdPin = G.addSinglePin(pinX, pinY, pinRadius);
+           // ↓↓↓ ステージデータからピンの座標を取得 ↓↓↓
+           const stageIndex = G.selectedStage - 1; // 配列インデックスに変換
+           let pinX, pinY;
+           const pinRadius = config.PIN_DEFAULT_RADIUS || 8; // 半径は定数またはデフォルト値
 
-            // 戻り値が有効なら G.pinBodies 配列に格納
-            if (createdPin) {
-                G.pinBodies = [createdPin]; // ★★★ 配列に単一のピンを入れる ★★★
+           // ステージデータが存在し、インデックスが有効範囲内か確認
+           if (stagePinData && stageIndex >= 0 && stageIndex < stagePinData.length && stagePinData[stageIndex]) {
+               pinX = stagePinData[stageIndex].x;
+               pinY = stagePinData[stageIndex].y;
+               console.log(`Pin position for Stage ${G.selectedStage} from data: (${pinX}, ${pinY})`);
+           } else {
+               // データが見つからない場合のデフォルト位置 (フォールバック)
+               console.warn(`Pin data for Stage ${G.selectedStage} not found. Using default position.`);
+               pinX = config.PIN_DEFAULT_X || config.CANVAS_WIDTH * 0.8;
+               pinY = config.PIN_DEFAULT_Y || config.CANVAS_HEIGHT * 0.4;
+           }
+           // ↑↑↑ 座標取得ここまで ↑↑↑
+
+           // 取得した座標でピンを追加
+           const createdPin = G.addSinglePin(pinX, pinY, pinRadius); // 半径も渡す
+
+           if (createdPin) {
+                G.pinBodies = [createdPin]; // 配列に格納
                 console.log(`Stored reference to the single pin (ID: ${createdPin.id}) at (${pinX}, ${pinY}).`);
-            } else {
-                G.pinBodies = []; // ピン作成失敗時は空にする
-                console.warn("Failed to create the single pin.");
-            }
-           // ↑↑↑ 変更ここまで ↑↑↑
+           } else {
+                G.pinBodies = [];
+                console.warn("Failed to create the single pin for the stage.");
+           }
            G.initializeLetters('G', config.NUM_INITIAL_LETTERS);
            G.setupSwipeMotion();
            console.log("Objects added and motion setup complete.");
