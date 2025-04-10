@@ -100,7 +100,7 @@ G.handleAfterUpdate = function(event) {
 
     let isNearAnyPin = false;
     const letterRadius = (38 * config.LETTER_SCALE); // 文字のおおよその半径
-    const pinRadius = 6; // obstacle.js で定義したピンの半径 (本当は config にあるべき)
+    const pinRadius = 4; // obstacle.js で定義したピンの半径 (本当は config にあるべき)
     const proximityMargin = 10; // 「近く」と判定する追加のマージン (ピクセル)
     const distanceThreshold = letterRadius + pinRadius + proximityMargin;
     const distanceThresholdSq = distanceThreshold * distanceThreshold; // 比較用の2乗値
